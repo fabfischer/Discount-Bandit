@@ -1,4 +1,4 @@
-# Discount Bandit (fork of [Discount Bandit](https://github.com/Cybrarist/Discount-Bandit)
+# Discount Bandit (fork of [Discount Bandit](https://github.com/Cybrarist/Discount-Bandit))
 
 Discount bandit is a price tracker across multiple stores, where you can track the price across all of them.
 

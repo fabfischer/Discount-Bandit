@@ -13,7 +13,7 @@ setup:
 	$(MAKE) check-requirements
 	docker-compose build
 	$(MAKE) start
-	until </dev/tcp/localhost/${FORWARD_DB_PORT}; do sleep 1; done
+	sleep 3
 	docker-compose exec -u www-data php-fpm composer install
 	# $(MAKE) migrations.migrate
 
