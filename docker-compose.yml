@@ -24,7 +24,7 @@ services:
         build:
             context: ./docker/php-fpm
             dockerfile: Dockerfile
-        restart: no
+        restart: "no"
         environment:
             WWWUSER: '${WWWUSER}'
             ADMIN_EMAIL: '${ADMIN_EMAIL}'
