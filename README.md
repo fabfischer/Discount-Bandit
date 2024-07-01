@@ -1,65 +1,6 @@
-![FreePalestine](./extra/palestine.png)
+# Discount Bandit (fork of [Discount Bandit](https://github.com/Cybrarist/Discount-Bandit)
 
+Discount bandit is a price tracker across multiple stores, where you can track the price across all of them.
 
-# Discount Bandit
-Discount Bandit is a price tracker across multiple shopping websites simultaneously, and get notified when an item reaches the price you desire, so you don't have to keep checking shop stores for price changes.
+You can also be notified when an item reaches your desired price, so you don't have to check each store every day.
 
-# NOTES:
-### the previous database will not work with the new one.
-
-I wasn't planning to make the project as this big tbh, so I had to redesign the database and
-make it more systematic, thus the previous database will not work, and you have to re-enter your
-products manually.
-
-# Documentation
-Feel free to access the documentation from [Here](https://discount-bandit.cybrarist.com)
-
-## Deployment
-Discount Bandit uses a web interface, so you need to install some dependencies first:
-- php (https://www.php.net)
-- composer (https://getcomposer.org)
-- apache or nginx (https://httpd.apache.org , https://www.nginx.com)
-- mysql (https://www.mysql.com)
-
-or you can install something like MAMP instead of installing each one alone. (https://www.mamp.info/en/windows/)
-
-one of the issues of the previous version was the amount of steps needed to set it up.
-so now I have reduced it.
-
-first, you need to install the packages with composer
-```bash
-composer install 
-```
-
-then run the following and follow the prompts
-```text
-php artisan discount:install
-```
-to make it easier for everyone, whether you are self hosting or just want to use the software, i have found that  
-https://ntfy.sh is the best solution. you can install their app from google play / appstore
-and can setup the notification very easily.
-
-# Updating
-If you updating the system, please run the following command 
-
-```text
-php artisan discount:update
-```
-# CronJob
-The previous command will give the output if whether you want to run app in the terminal or as cron for windows, mac and linux.
-
-# Updates
-If you want to update the code, after installing the new version run the following
-```text
-php artisan discount:update
-```
-## Connect
-If you are coming outside github or don't like to use it, feel free to join my discord.
-https://discord.gg/VBMHvH8tuR
-
-## Docker
-There is no docker image for beta, since i might need the flexibility to push updates or fix bugs.
-
-
-## Sponsors
-![Jetbrains](https://resources.jetbrains.com/storage/products/company/brand/logos/jb_beam.svg)
