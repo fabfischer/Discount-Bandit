@@ -14,7 +14,7 @@ setup:
 	docker-compose build
 	$(MAKE) start
 	sleep 3
-	docker-compose exec -u www-data php-fpm composer install
+	# docker-compose exec -u www-data php-fpm composer install
 	# $(MAKE) migrations.migrate
 
 .PHONE: destroy
