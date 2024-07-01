@@ -8,7 +8,6 @@ use App\Classes\Stores\Ebay;
 use App\Classes\URLHelper;
 use App\Filament\Resources\ProductResource;
 use App\Filament\Resources\ProductResource\Widgets\PriceHistoryChart;
-use App\Livewire\BlogCommentsChart;
 use App\Models\Product;
 use App\Models\ProductStore;
 use App\Models\Store;
@@ -22,40 +21,35 @@ class EditProduct extends EditRecord
 {
     protected static string $resource = ProductResource::class;
 
-
-//    protected function getRedirectUrl(): ?string
-//    {
-//        return route('filament.admin.resources.products.edit', $this->record->id);
-//    }
-
-
     protected function getHeaderActions(): array
     {
         return [
             Actions\DeleteAction::make(),
-            Actions\Action::make('Fetch')->color('primary')->action(function ($record){
+            Actions\Action::make('Fetch')->color('primary')->action(function ($record) {
                 try {
-
-                    $product_stores=DB::table('product_store')
+                    $product_stores = DB::table('product_store')
                         ->where('product_id', $this->record->id)
-                        ->join('stores', 'store_id', '=' , 'stores.id')
+                        ->join('stores', 'store_id', '=', 'stores.id')
                         ->orderBy('product_store.updated_at')
                         ->get();
 
-
-                    foreach ($product_stores as $product_store)
-                        if (MainStore::is_amazon($product_store->slug))
-                            new Amazon(Product::find($product_store->product_id), Store::find($product_store->store_id));
-                        else if (is_ebay($product_store->slug))
-                            new Ebay(Product::find($product_store->product_id), Store::find($product_store->store_id) , null, $product_store->ebay_id);
+                    foreach ($product_stores as $product_store) {
+                        $product = Product::find($product_store->product_id);
+                        if ($product) {
+                            if (MainStore::is_amazon($product_store->slug)) {
+                                new Amazon($product);
+                            } elseif (MainStore::is_ebay($product_store->slug)) {
+                                new Ebay($product);
+                            }
+                        }
+                    }
 
                     Notification::make()
                         ->title('Data Has been Fetched, Please refresh to see the new values.')
                         ->success()
                         ->send();
-                }
-                catch ( \Exception $e){
-                    Log::error("Couldn't fetch the job with error : $e" );
+                } catch (\Exception $e) {
+                    Log::error("Couldn't fetch the job with error : $e");
                     Notification::make()
                         ->title("Couldn't fetch the product, refer to logs")
                         ->danger()
@@ -68,49 +62,51 @@ class EditProduct extends EditRecord
     }
 
 
-    protected function mutateFormDataBeforeSave(array $data) : array{
+    protected function mutateFormDataBeforeSave(array $data): array
+    {
+        $extra_keys = [];
+        $extra_data = ['notify_price' => $data['notify_price'] ?? null,];
 
-        $extra_keys=[];
-        $extra_data=['notify_price'=>$data['notify_price'] ?? null,];
 
-
-        if ($data['url']){
-            $url=new URLHelper($data['url']);
+        if ($data['url']) {
+            $url = new URLHelper($data['url']);
 
             //validate the url and check for duplicates
-            if (!MainStore::validate_url($url))
+            if (!MainStore::validate_url($url)) {
                 $this->halt();
+            }
 
-            if (MainStore::is_diy($url->domain)){
+            if (MainStore::is_diy($url->domain)) {
                 ProductStore::updateOrCreate([
-                    "store_id" =>  Store::where('domain' , $url->domain)->first()->id,
-                    "key"=>$url->get_diy_id(),
+                    "store_id"   => Store::where('domain', $url->domain)->first()->id,
+                    "key"        => $url->get_diy_id(),
                     "product_id" => $this->record->id,
-                ],[
-                    "notify_price"=>$this->data['notify_price'] ?? 0,
+                ], [
+                    "notify_price" => $this->data['notify_price'] ?? 0,
                 ]);
 
-            }
-            elseif (MainStore::is_ebay($url->domain)){
-                $extra_keys=['ebay_id'=>$url->get_ebay_item_id()];
-                $extra_data=\Arr::add($extra_data , 'remove_if_sold' , $data['remove_if_sold']  ?? null);
+            } elseif (MainStore::is_ebay($url->domain)) {
+                $extra_keys = ['ebay_id' => $url->get_ebay_item_id()];
+                $extra_data = \Arr::add($extra_data, 'remove_if_sold', $data['remove_if_sold'] ?? null);
             }
 
-            MainStore::insert_other_store(domain: $url->domain , product_id: $this->record->id, extra_keys: $extra_keys, extra_data: $extra_data);
+            MainStore::insert_other_store(domain: $url->domain, product_id: $this->record->id, extra_keys: $extra_keys,
+                extra_data: $extra_data);
             $this->dispatch('refresh_products_relation');
         }
 
 
-        return \Arr::except($data , ["url"]);
+        return \Arr::except($data, ["url"]);
     }
 
     protected function getFooterWidgets(): array
     {
-        if ($this->getRecord()->stores()->count() )
+        if ($this->getRecord()->stores()->count()) {
             return [
                 PriceHistoryChart::class,
-//                BlogCommentsChart::class
+                //                BlogCommentsChart::class
             ];
+        }
         return [];
 
     }

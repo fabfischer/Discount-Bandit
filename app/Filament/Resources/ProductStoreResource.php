@@ -22,14 +22,17 @@ use function Filament\Support\format_money;
 class ProductStoreResource extends Resource
 {
     protected static ?string $model = ProductStore::class;
-    protected static ?string $label="Single Product Store View";
+    protected static ?string $label = "Single Product Store View";
 
     protected static ?string $navigationIcon = 'heroicon-m-document';
 
-    protected static ?int $navigationSort=2;
-    public static function canCreate() : bool{
-     return false;
+    protected static ?int $navigationSort = 2;
+
+    public static function canCreate(): bool
+    {
+        return false;
     }
+
     public static function form(Form $form): Form
     {
         return $form
@@ -40,7 +43,7 @@ class ProductStoreResource extends Resource
                     ->disabled()
                     ->dehydrated(false)
                     ->label('Current Price')
-                    ->prefix(function ($record){
+                    ->prefix(function ($record) {
                         return get_currencies($record->store->currency_id);
                     }),
 
@@ -48,7 +51,7 @@ class ProductStoreResource extends Resource
                     ->numeric()
                     ->integer()
                     ->label('Notify when cheaper than')
-                    ->prefix(function ($record){
+                    ->prefix(function ($record) {
                         return get_currencies($record->store->currency_id);
                     }),
             ]);
@@ -57,7 +60,6 @@ class ProductStoreResource extends Resource
 
     public static function table(Table $table): Table
     {
-
         return $table
             ->columns([
                 Tables\Columns\ImageColumn::make('product.image')
@@ -65,29 +67,30 @@ class ProductStoreResource extends Resource
                 Tables\Columns\TextColumn::make('product.name')
                     ->searchable()
                     ->words(5)
-                    ->url( function ($record) {
+                    ->url(function ($record) {
                         return route('filament.admin.resources.products.edit', $record->product_id);
-                    } ,true)
-                    ,
+                    }, true)
+                ,
                 Tables\Columns\TextColumn::make('store.name')
                     ->words(5)
                     ->color("warning")
-                    ->url( function ($record) {
+                    ->url(function ($record) {
                         return route('filament.admin.resources.stores.edit', $record->store_id);
-                    } ,true)
+                    }, true)
                 ,
                 Tables\Columns\TextColumn::make('price')
-                    ->formatStateUsing(function ($record){
-                    return prepare_single_prices_in_table($record->price,$record->store->currency_id, true,$record->notify_price );
-                }),
+                    ->formatStateUsing(function ($record) {
+                        return prepare_single_prices_in_table($record->price, $record->store->currency_id, true,
+                            $record->notify_price);
+                    }),
                 Tables\Columns\TextColumn::make('notify_price')
-                    ->formatStateUsing(function ($record){
-                    return prepare_single_prices_in_table($record->notify_price,$record->store->currency_id );
-                }),
+                    ->formatStateUsing(function ($record) {
+                        return prepare_single_prices_in_table($record->notify_price, $record->store->currency_id);
+                    }),
                 Tables\Columns\TextColumn::make('shipping_price')
-                    ->formatStateUsing(function ($record){
-                    return prepare_single_prices_in_table($record->shipping_price,$record->store->currency_id );
-                }),
+                    ->formatStateUsing(function ($record) {
+                        return prepare_single_prices_in_table($record->shipping_price, $record->store->currency_id);
+                    }),
                 Tables\Columns\TextColumn::make('rate'),
                 Tables\Columns\TextColumn::make('updated_at'),
                 Tables\Columns\TextColumn::make('number_of_rates'),
@@ -103,15 +106,16 @@ class ProductStoreResource extends Resource
                     ->label('Stores'),
 
                 Filter::make('price_notify_price')->query(function (Builder $query) {
-                        return $query->whereRaw('price <= notify_price');
-                            })
+                    return $query->whereRaw('price <= notify_price');
+                })
                     ->label('Price Met Target')
                     ->toggle(),
 
                 Filter::make('favourite')->query(function (Builder $query) {
-                    $query->whereHas('product', function ($query2){
+                    $query->whereHas('product', function ($query2) {
                         $query2->where('favourite', 1);
-                    });})
+                    });
+                })
                     ->label('Favourite product')
                     ->toggle(),
 
@@ -136,9 +140,9 @@ class ProductStoreResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListProductStores::route('/'),
+            'index'  => Pages\ListProductStores::route('/'),
             'create' => Pages\CreateProductStore::route('/create'),
-            'edit' => Pages\EditProductStore::route('/{record}/edit'),
+            'edit'   => Pages\EditProductStore::route('/{record}/edit'),
         ];
     }
 }

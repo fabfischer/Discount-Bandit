@@ -20,11 +20,10 @@ class GetProductJob implements ShouldQueue
     public int $product_store_id;
     public string $domain;
 
-
-    public function __construct($product_store_id , $domain)
+    public function __construct($product_store_id, $domain)
     {
-        $this->product_store_id=$product_store_id;
-        $this->domain=$domain;
+        $this->product_store_id = $product_store_id;
+        $this->domain = $domain;
     }
 
     /**
@@ -32,15 +31,14 @@ class GetProductJob implements ShouldQueue
      */
     public function handle(): void
     {
-
-        if (MainStore::is_amazon($this->domain))
+        if (MainStore::is_amazon($this->domain)) {
             new Amazon($this->product_store_id);
-        elseif (MainStore::is_ebay($this->domain))
+        } elseif (MainStore::is_ebay($this->domain)) {
             new Ebay($this->product_store_id);
-       elseif (MainStore::is_walmart($this->domain))
+        } elseif (MainStore::is_walmart($this->domain)) {
             new Walmart($this->product_store_id);
-       elseif (MainStore::is_argos($this->domain))
+        } elseif (MainStore::is_argos($this->domain)) {
             new Argos($this->product_store_id);
-
+        }
     }
 }

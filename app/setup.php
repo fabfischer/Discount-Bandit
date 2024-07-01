@@ -8,7 +8,7 @@ function setup_stores() : array{
             'name'=>'Amazon UAE',
             'domain'=>'amazon.ae',
             'image'=>'amazon_ae.png',
-            'referral'=>'cybrarist0b-21',
+            'referral'=>'',
             'currency_id'=>Currency::firstOrCreate(['code'=>'AED'])->id,
             'slug'=>'amazon_ae'
         ],
@@ -16,7 +16,7 @@ function setup_stores() : array{
             'name'=>'Amazon USA',
             'domain'=>'amazon.com',
             'image'=>'amazon.png',
-            'referral'=>'cybrarist0e-20',
+            'referral'=>'',
             'currency_id'=>Currency::firstOrCreate(['code'=>'$'])->id,
             'slug'=>'amazon_com'
         ],
@@ -24,7 +24,7 @@ function setup_stores() : array{
             'name'=>'Amazon UK',
             'domain'=>'amazon.co.uk',
             'image'=>'amazon_co_uk.png',
-            'referral'=>'cybrarist07-21',
+            'referral'=>'',
             'currency_id'=>Currency::firstOrCreate(['code'=>'£'])->id,
             'slug'=>'amazon_uk'
         ],
@@ -32,7 +32,7 @@ function setup_stores() : array{
             'name'=>'Amazon Germany',
             'domain'=>'amazon.de',
             'image'=>'amazon_de.png',
-            'referral'=>'cybrarist018-21',
+            'referral'=>'',
             'currency_id'=>Currency::firstOrCreate(['code'=>'€'])->id,
             'slug'=>'amazon_de'
         ],
@@ -40,7 +40,7 @@ function setup_stores() : array{
             'name'=>'Amazon France',
             'domain'=>'amazon.fr',
             'image'=>'amazon_fr.png',
-            'referral'=>'cybrarist02-21',
+            'referral'=>'',
             'currency_id'=>Currency::firstOrCreate(['code'=>'€'])->id,
             'slug'=>'amazon_fr'
         ],
@@ -48,7 +48,7 @@ function setup_stores() : array{
             'name'=>'Amazon Italy',
             'domain'=>'amazon.it',
             'image'=>'amazon_it.png',
-            'referral'=>'cybrarist0e-21',
+            'referral'=>'',
             'currency_id'=>Currency::firstOrCreate(['code'=>'€'])->id,
             'slug'=>'amazon_it'
         ],
@@ -56,7 +56,7 @@ function setup_stores() : array{
             'name'=>'Amazon Saudi Arabia',
             'domain'=>'amazon.sa',
             'image'=>'amazon_sa.png',
-            'referral'=>'cybrarist05-21',
+            'referral'=>'',
             'currency_id'=>Currency::firstOrCreate(['code'=>'SAR'])->id,
             'slug'=>'amazon_sa'
         ],
@@ -64,7 +64,7 @@ function setup_stores() : array{
             'name'=>'Amazon Spain',
             'domain'=>'amazon.es',
             'image'=>'amazon_es.png',
-            'referral'=>'cybrarist08b-21',
+            'referral'=>'',
             'currency_id'=>Currency::firstOrCreate(['code'=>'€'])->id,
             'slug'=>'amazon_es'
         ],
@@ -72,7 +72,7 @@ function setup_stores() : array{
             'name'=>'Amazon Poland',
             'domain'=>'amazon.pl',
             'image'=>'amazon_pl.png',
-            'referral'=>'none',
+            'referral'=>'',
             'currency_id'=>Currency::firstOrCreate(['code'=>'zł'])->id,
             'slug'=>'amazon_pl'
         ],
@@ -80,7 +80,7 @@ function setup_stores() : array{
             'name'=>'Amazon Turkey',
             'domain'=>'amazon.com.tr',
             'image'=>'amazon_com_tr.png',
-            'referral'=>'none',
+            'referral'=>'',
             'currency_id'=>Currency::firstOrCreate(['code'=>'TL'])->id,
             'slug'=>'amazon_com_tr'
         ],
@@ -88,7 +88,7 @@ function setup_stores() : array{
             'name'=>'Amazon Australia',
             'domain'=>'amazon.com.au',
             'image'=>'amazon_com_au.png',
-            'referral'=>'none',
+            'referral'=>'',
             'currency_id'=>Currency::firstOrCreate(['code'=>'$'])->id,
             'slug'=>'amazon_com_au'
         ],
@@ -96,7 +96,7 @@ function setup_stores() : array{
             'name'=>'Amazon Brazil',
             'domain'=>'amazon.com.br',
             'image'=>'amazon_com_br.png',
-            'referral'=>'none',
+            'referral'=>'',
             'currency_id'=>Currency::firstOrCreate(['code'=>'R$'])->id,
             'slug'=>'amazon_com_br'
         ],
@@ -104,7 +104,7 @@ function setup_stores() : array{
             'name'=>'Amazon Canada',
             'domain'=>'amazon.ca',
             'image'=>'amazon_ca.png',
-            'referral'=>'cybrarist08-20',
+            'referral'=>'',
             'currency_id'=>Currency::firstOrCreate(['code'=>'$'])->id,
             'slug'=>'amazon_ca'
         ],
@@ -112,7 +112,7 @@ function setup_stores() : array{
             'name'=>'Amazon China',
             'domain'=>'amazon.cn',
             'image'=>'amazon.png',
-            'referral'=>'none',
+            'referral'=>'',
             'currency_id'=>Currency::firstOrCreate(['code'=>'¥'])->id,
             'slug'=>'amazon_tr'
         ],
@@ -120,7 +120,7 @@ function setup_stores() : array{
             'name'=>'Amazon Egypt',
             'domain'=>'amazon.eg',
             'image'=>'amazon_eg.png',
-            'referral'=>'none',
+            'referral'=>'',
             'currency_id'=>Currency::firstOrCreate(['code'=>'EGP'])->id,
             'slug'=>'amazon_eg'
         ],
@@ -128,7 +128,7 @@ function setup_stores() : array{
             'name'=>'Amazon Japan',
             'domain'=>'amazon.co.jp',
             'image'=>'amazon_co_jp.png',
-            'referral'=>'none',
+            'referral'=>'',
             'currency_id'=>Currency::firstOrCreate(['code'=>'¥'])->id,
             'slug'=>'amazon_co_jp'
         ],
@@ -136,7 +136,7 @@ function setup_stores() : array{
             'name'=>'Amazon India',
             'domain'=>'amazon.in',
             'image'=>'amazon_in.png',
-            'referral'=>'none',
+            'referral'=>'',
             'currency_id'=>Currency::firstOrCreate(['code'=>'₹'])->id,
             'slug'=>'amazon_in'
         ],
@@ -144,7 +144,7 @@ function setup_stores() : array{
             'name'=>'Amazon Mexicon',
             'domain'=>'amazon.com.mx',
             'image'=>'amazon_com_mx.png',
-            'referral'=>'none',
+            'referral'=>'',
             'currency_id'=>Currency::firstOrCreate(['code'=>'$'])->id,
             'slug'=>'amazon_com_mx'
         ],
@@ -152,7 +152,7 @@ function setup_stores() : array{
             'name'=>'Amazon Netherlands',
             'domain'=>'amazon.nl',
             'image'=>'amazon_nl.png',
-            'referral'=>'none',
+            'referral'=>'',
             'currency_id'=>Currency::firstOrCreate(['code'=>'€'])->id,
             'slug'=>'amazon_nl'
         ],
@@ -160,7 +160,7 @@ function setup_stores() : array{
             'name'=>'Amazon Singapore',
             'domain'=>'amazon.sg',
             'image'=>'amazon_sg.png',
-            'referral'=>'none',
+            'referral'=>'',
             'currency_id'=>Currency::firstOrCreate(['code'=>'S$'])->id,
             'slug'=>'amazon_sg'
         ],
@@ -168,7 +168,7 @@ function setup_stores() : array{
             'name'=>'Amazon Sweden',
             'domain'=>'amazon.se',
             'image'=>'amazon_se.png',
-            'referral'=>'cybrarist09-21',
+            'referral'=>'',
             'currency_id'=>Currency::firstOrCreate(['code'=>'kr'])->id,
             'slug'=>'amazon_se'
         ],
@@ -176,7 +176,7 @@ function setup_stores() : array{
             'name'=>'Amazon Belgium',
             'domain'=>'amazon.com.be',
             'image'=>'amazon.png',
-            'referral'=>'none',
+            'referral'=>'',
             'currency_id'=>Currency::firstOrCreate(['code'=>'€'])->id,
             'slug'=>'amazon_com_be'
         ],
@@ -186,7 +186,7 @@ function setup_stores() : array{
             'name'=>'Ebay',
             'domain'=>'ebay.com',
             'image'=>'ebay.png',
-            'referral'=>'none',
+            'referral'=>'',
             'currency_id'=>Currency::firstOrCreate(['code'=>'$'])->id,
             'slug'=>'ebay_com'
         ],
@@ -194,7 +194,7 @@ function setup_stores() : array{
             'name'=>'Walmart USA',
             'domain'=>'walmart.com',
             'image'=>'walmart.png',
-            'referral'=>'none',
+            'referral'=>'',
             'currency_id'=>Currency::firstOrCreate(['code'=>'$'])->id,
             'slug'=>'walmart_com'
         ],
@@ -203,7 +203,7 @@ function setup_stores() : array{
             'name'=>'Walmart Canada',
             'domain'=>'walmart.ca',
             'image'=>'walmart.png',
-            'referral'=>'none',
+            'referral'=>'',
             'currency_id'=>Currency::firstOrCreate(['code'=>'$'])->id,
             'slug'=>'walmart_ca'
         ],
@@ -212,7 +212,7 @@ function setup_stores() : array{
             'name'=>'Target',
             'domain'=>'target.com',
             'image'=>'target.png',
-            'referral'=>'none',
+            'referral'=>'',
             'currency_id'=>Currency::firstOrCreate(['code'=>'$'])->id,
             'slug'=>'target_com'
         ],
@@ -220,7 +220,7 @@ function setup_stores() : array{
             'name'=>'Argos UK',
             'domain'=>'argos.co.uk',
             'image'=>'argos.png',
-            'referral'=>'none',
+            'referral'=>'',
             'currency_id'=>Currency::firstOrCreate(['code'=>'£'])->id,
             'slug'=>'argos_co_uk'
         ],
@@ -228,7 +228,7 @@ function setup_stores() : array{
             'name'=>'DIY',
             'domain'=>'diy.com',
             'image'=>'diy_com.svg',
-            'referral'=>'none',
+            'referral'=>'',
             'currency_id'=>Currency::firstOrCreate(['code'=>'£'])->id,
             'slug'=>'diy_com'
         ],

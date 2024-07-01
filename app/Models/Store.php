@@ -10,21 +10,17 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Store extends Model
 {
-    use HasFactory ;
+    use HasFactory;
 
-    protected $guarded=['id'];
+    protected $guarded = ['id'];
 
-    protected $casts=[
-        'status'=>StatusEnum::class,
-        'price'=>Money::class,
-        'notify_price'=>Money::class,
-        'shipping_price'=>Money::class,
-
-        'pivot.updated_at'=>'datetime',
+    protected $casts = [
+        'status'         => StatusEnum::class,
+        'price'          => Money::class,
+        'notify_price'   => Money::class,
+        'shipping_price' => Money::class,
+        'pivot.updated_at' => 'datetime',
     ];
-
-
-
 
     public function currency()
     {
@@ -50,4 +46,4 @@ class Store extends Model
             'ebay_id',
         ]);
     }
-    }
+}

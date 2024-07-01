@@ -7,6 +7,9 @@ use App\Classes\URLHelper;
 use App\Interfaces\StoreInterface;
 use App\Models\Product;
 use App\Models\ProductStore;
+use App\Models\User;
+use App\Notifications\Ntfy;
+use App\Notifications\ProductDiscount;
 use Error;
 use Exception;
 use Filament\Notifications\Notification;
@@ -16,15 +19,16 @@ use function App\Classes\error;
 
 class Amazon extends MainStore
 {
-    const MAIN_URL="https://store/en/dp/product_id?tag=referral_code" ;
-    private  $center_column;
+    const MAIN_URL = "https://store/en/dp/product_id";
+    private $center_column;
     private $right_column;
 
-    public function __construct($product_store_id) {
-
+    public function __construct($product_store_id)
+    {
         parent::get_record($product_store_id);
+
         //prepare the url template
-        $this->product_url= parent::prepare_url(
+        $this->product_url = parent::prepare_url(
             domain: $this->current_record->store->domain,
             product: $this->current_record->product->asin,
             store_url_template: self::MAIN_URL,
@@ -34,11 +38,20 @@ class Amazon extends MainStore
         try {
             parent::crawl_url();
             self::prepare_sections_to_crawl();
-        }
-        catch (\Exception $exception){
+        } catch (\Exception $exception) {
+            $message = $exception->getMessage();
             Log::error("Couldn't Crawl the website for the following url $this->product_url \n");
+            Log::error(
+                sprintf("The error message is %s \n", $message)
+            );
+            Ntfy::send(
+                "Couldn't Crawl the website",
+                "The following url couldn't be crawled",
+                "The error message is $message"
+            );
             return;
         }
+
         //crawl the website to get the important information
         $this->crawling_process();
 
@@ -46,21 +59,24 @@ class Amazon extends MainStore
         $this->check_notification();
 
     }
-    public function prepare_sections_to_crawl(){
+
+    public function prepare_sections_to_crawl()
+    {
         //get the center column to get the related data for it
-        $this->center_column=$this->xml->xpath("//div[@id='centerCol']")[0];
+        $this->center_column = $this->xml->xpath("//div[@id='centerCol']")[0];
         //get the right column to get the seller and other data
-        $this->right_column=$this->xml->xpath("//div[@id='desktop_buybox']")[0];
+        $this->right_column = $this->xml->xpath("//div[@id='desktop_buybox']")[0];
     }
 
-    public function crawling_process(){
+    public function crawling_process()
+    {
         //if the product already has a name, no need to crawl it again.
-        if (!$this->current_record->product->name || !$this->current_record->product->image){
+        if (!$this->current_record->product->name || !$this->current_record->product->image) {
             $this->get_name();
             $this->get_image();
-            $this->update_product_details($this->current_record->product_id ,[
-                'name'=>$this->name,
-                'image'=>$this->image
+            $this->update_product_details($this->current_record->product_id, [
+                'name'  => $this->name,
+                'image' => $this->image
             ]);
         }
 
@@ -71,21 +87,33 @@ class Amazon extends MainStore
         $this->get_seller();
         $this->get_shipping_price();
 
+        if (empty($this->price)) {
+            Ntfy::send(
+                "Couldn't get the price",
+                "The price couldn't be fetched for the following product",
+                "The product is $this->name"
+            );
+        }
+
+        $product = Product::find($this->current_record->product_id);
+        $name = ($product) ? $product->name : $this->current_record->product_id;
+        // Log::info("Product: $name crawled successfully");
+
         $this->current_record->update([
-            'price' => (float)$this->price,
-            'number_of_rates' => $this->no_of_rates,
-            'seller' => $this->seller,
-            'rate' => $this->rating,
-            'shipping_price' => $this->shipping_price,
-            'condition'=>"new",
-            'in_stock'=>$this->in_stock,
-            'notifications_sent' => ($this->check_notification()) ? ++$this->current_record->notifications_sent : $this->current_record->notifications_sent ,
+            'price'              => (float)$this->price,
+            'number_of_rates'    => $this->no_of_rates,
+            'seller'             => $this->seller,
+            'rate'               => $this->rating,
+            'shipping_price'     => $this->shipping_price,
+            'condition'          => "new",
+            'in_stock'           => $this->in_stock,
+            'notifications_sent' => ($this->check_notification()) ? ++$this->current_record->notifications_sent : $this->current_record->notifications_sent,
         ]);
 
         parent::record_price_history(
             product_id: $this->current_record->product_id,
             store_id: $this->current_record->store_id,
-            price:  $this->price
+            price: $this->price
         );
 
     }
@@ -99,169 +127,166 @@ class Amazon extends MainStore
     /**
      * Get the data from the store
      */
-    public function get_name(){
+    public function get_name()
+    {
 
         try {
-            $this->name = explode(":" ,$this->document->getElementsByTagName("title")->item(0)->textContent)[0];
+            $this->name = explode(":", $this->document->getElementsByTagName("title")->item(0)->textContent)[0];
             return;
-        }
-        catch (Error | Exception $e){
+        } catch (Error|Exception $e) {
             $this->throw_error("Product Name First Method");
         }
 
         try {
-            $this->name = trim($this->center_column->xpath("//span[@id='productname'][1]")[0]
+            $this->name = trim($this->center_column->xpath("//span[@id='productTitle'][1]")[0]
                 ->__toString());
-        }
-        catch ( Error | Exception $e) {
+        } catch (Error|Exception $e) {
             $this->throw_error("Product Name Second Method");
             $this->name = "NA";
         }
 
 
     }
-    public function get_image(){
 
+    public function get_image()
+    {
         try {
             $this->image = $this->document->getElementById("landingImage")->getAttribute("data-old-hires");
-        }
-        catch ( Error | Exception $e) {
+        } catch (Error|Exception $e) {
             $this->throw_error("The Image");
             $this->image = "";
         }
 
     }
-    public function get_price(){
-        //method 1 to return the price of the product
-        try {
-            $this->price=  (float) Str::replace(get_currencies($this->current_record->currency_id) , "" ,$this->center_column->xpath("(//span[contains(@class, 'apexPriceToPay')])[1]")[0]->span->__toString());
 
-            return ;
-        }
-        catch ( Error | \Exception  $e )
-        {
+    public function get_price()
+    {
+        //method 1 to return the price of the product
+        /*try {
+            $this->price = (float)Str::replace(
+                get_currencies($this->current_record->currency_id),
+                "",
+                $this->center_column->xpath("(//span[contains(@class, 'apexPriceToPay')])[1]")[0]->span->__toString()
+            );
+
+            return;
+        } catch (Error|\Exception  $e) {
             $this->throw_error("First Method Price");
-        }
+        }*/
 
         //method 2 to return the price of the product
         try {
-            $whole=Str::remove([",","\u{A0}"] ,
+            $whole = Str::remove([",", "\u{A0}"],
                 $this->center_column
                     ->xpath("//div[@id='corePriceDisplay_desktop_feature_div']//span[@class='a-price-whole']")[0]
                     ->__toString());
 
-            $fraction=Str::remove([",","\u{A0}"] ,
+            $fraction = Str::remove([",", "\u{A0}"],
                 $this->center_column
                     ->xpath("//div[@id='corePriceDisplay_desktop_feature_div']//span[@class='a-price-fraction']")[0]
                     ->__toString());
 
-            $this->price=  (float)"$whole.$fraction";
+            $this->price = (float)"$whole.$fraction";
             return;
-        }
-        catch (Error | \Exception $e )
-        {
-            $this->throw_error( "Price Second");
-            $this->price=0;
+        } catch (Error|\Exception $e) {
+            $this->throw_error("Price Second");
+            $this->price = 0;
         }
 
     }
-    public function get_stock(){
+
+    public function get_stock()
+    {
         try {
-            $availability_string=Str::squish($this->document->getElementById("availability")->textContent) ;
-            if (Str::contains($availability_string , "in stock" , true) && Str::length($availability_string) <10){
-                $this->in_stock=true;
+            $availability_string = Str::squish($this->document->getElementById("availability")->textContent);
+            if (Str::contains($availability_string, "in stock", true) && Str::length($availability_string) < 10) {
+                $this->in_stock = true;
                 return;
             }
 
-            $this->in_stock=false;
-        }catch (\Exception $e){
-            $this->throw_error( "Stock");
-            $this->in_stock=true;
+            $this->in_stock = false;
+        } catch (\Exception $e) {
+            $this->throw_error("Stock");
+            $this->in_stock = true;
         }
     }
-    public function get_no_of_rates(){
+
+    public function get_no_of_rates()
+    {
         try {
-            $ratings=$this->center_column->xpath("//span[@id='acrCustomerReviewText']")[0]->__toString();
-            $this->no_of_rates= (int) get_numbers_only_with_dot($ratings);
-        }
-        catch (Error | Exception $e)
-        {
+            $ratings = $this->center_column->xpath("//span[@id='acrCustomerReviewText']")[0]->__toString();
+            $this->no_of_rates = (int)get_numbers_only_with_dot($ratings);
+        } catch (Error|Exception $e) {
             $this->throw_error("No. Of Rates");
-            $this->no_of_rates=0;
+            $this->no_of_rates = 0;
         }
     }
-    public function get_rate(){
+
+    public function get_rate()
+    {
         try {
             //check if the store is amazon poland or not
-             ($this->current_record->domain == "amazon.pl") ? $exploding='z' : $exploding='out';
+            ($this->current_record->domain == "amazon.pl") ? $exploding = 'z' : $exploding = 'out';
 
-            $this->rating= explode(" $exploding" ,
-                $this->center_column->xpath("//div[@id='averageCustomerReviews']//span[@id='acrPopover']//span[@class='a-icon-alt']")[0]->__toString() ,
+            $this->rating = explode(" $exploding",
+                $this->center_column->xpath("//div[@id='averageCustomerReviews']//span[@id='acrPopover']//span[@class='a-icon-alt']")[0]->__toString(),
                 2)[0];
-        }
-        catch (Error | Exception $e )
-        {
+        } catch (Error|Exception $e) {
             $this->throw_error("The Rate");
-            $this->rating= -1;
+            $this->rating = -1;
         }
 
     }
 
-    public function get_seller(){
-
+    public function get_seller()
+    {
         try {
-            $this->seller=$this
-                ->right_column
-                ->xpath("//div[@id='merchantInfoFeature_feature_div']//div[@class='offer-display-feature-text']//span")[0]
+            $this->seller = $this
+                                ->right_column
+                                ->xpath("//div[@id='merchantInfoFeature_feature_div']//div[@class='offer-display-feature-text']//span")[0]
                 ->__toString();
             return;
-        }
-        catch (Error | Exception $e )
-        {
-            $this->throw_error("The Seller First Method" );
+        } catch (Error|Exception $e) {
+            $this->throw_error("The Seller First Method");
         }
 
         try {
-            $this->seller=$this
-                ->right_column
-                ->xpath("//div[@id='merchantInfoFeature_feature_div']//a[@id='sellerProfileTriggerId']")[0]
+            $this->seller = $this
+                                ->right_column
+                                ->xpath("//div[@id='merchantInfoFeature_feature_div']//a[@id='sellerProfileTriggerId']")[0]
                 ->__toString();
             return;
-        }
-        catch (Error | Exception $e )
-        {
-            $this->throw_error("The Seller Second method" );
+        } catch (Error|Exception $e) {
+            $this->throw_error("The Seller Second method");
         }
 
         //seller method for subscribe and save items
         try {
-            $this->seller=$this
-                ->right_column
-                ->xpath("//div[@id='shipsFromSoldByMessage_feature_div']//span")[0]
+            $this->seller = $this
+                                ->right_column
+                                ->xpath("//div[@id='shipsFromSoldByMessage_feature_div']//span")[0]
                 ->__toString();
             //trim the spaces
             $this->seller = trim($this->seller);
-            $this->seller=explode('by ' , $this->seller)[1] ?? $this->seller;
+            $this->seller = explode('by ', $this->seller)[1] ?? $this->seller;
 
             return;
-        }
-        catch (Error | Exception $e )
-        {
-            $this->throw_error("The Seller Third Method" );
-            $this->seller="";
+        } catch (Error|Exception $e) {
+            $this->throw_error("The Seller Third Method");
+            $this->seller = "";
         }
     }
-    public function get_shipping_price(){
+
+    public function get_shipping_price()
+    {
         try {
-            $shipping_price=$this->right_column->xpath("//div[@id='deliveryBlockMessage']//span[@data-csa-c-delivery-price]")[0]->__toString();
-            $shipping_price= Str::replace("," , "." , $shipping_price);
-            $this->shipping_price= (float) get_numbers_only_with_dot($shipping_price);
-        }
-        catch (Error  | Exception $e)
-        {
+            $shipping_price = $this->right_column->xpath("//div[@id='deliveryBlockMessage']//span[@data-csa-c-delivery-price]")[0]->__toString();
+            $shipping_price = Str::replace(",", ".", $shipping_price);
+            $this->shipping_price = (float)get_numbers_only_with_dot($shipping_price);
+        } catch (Error|Exception $e) {
 
             $this->throw_error("Shipping Price");
-            $this->shipping_price= 0;
+            $this->shipping_price = 0;
         }
     }
 
@@ -270,67 +295,68 @@ class Amazon extends MainStore
      */
     public function check_notification(): bool
     {
-
-        if ($this->notification_snoozed())
+        if ($this->notification_snoozed()) {
             return false;
+        }
 
-        if ($this->stock_available()){
+        if ($this->stock_available()) {
             $this->notify();
             return true;
         }
 
-        if (!$this->price_crawled_and_different_from_database())
+        if (!$this->price_crawled_and_different_from_database()) {
             return false;
+        }
 
         //if the seller is not amazon, then don't notify the user
-        if ($this->current_record->product->only_official && ! self::is_amazon($this->seller))
+        if ($this->current_record->product->only_official && !self::is_amazon($this->seller)) {
             return false;
+        }
 
 
         if ($this->current_record->product->lowest_within &&
             parent::is_price_lowest_within(
-                product_id:  $this->current_record->product_id ,
+                product_id: $this->current_record->product_id,
                 store_id: $this->current_record->store_id,
                 days: $this->current_record->product->lowest_within,
                 price: $this->price
-            )){
+            )) {
             $this->notify();
             return true;
-            }
+        }
 
 
-        if ($this->max_notification_reached())
+        if ($this->max_notification_reached()) {
             return false;
+        }
 
-        if ($this->price_reached_desired()){
+        if ($this->price_reached_desired()) {
             $this->notify();
             return true;
         }
         return false;
     }
 
-
-    public static function get_variations($url) : array
+    public static function get_variations($url): array
     {
-        $response=self::get_website($url);
-        self::prepare_dom($response ,$document ,$xml);
+        $response = self::get_website($url);
+        self::prepare_dom($response, $document, $xml);
         try {
             $array_script = $document->getElementById("twister_feature_div")->getElementsByTagName("script");
-            $array_script=$array_script->item($array_script->count()-1)->nodeValue;
-            $array_script=explode('"dimensionValuesDisplayData"' ,$array_script)[1];
-            $array_script=explode("\n" ,$array_script)[0];
-            $final_string=preg_replace('/\s+[\{\}\:]/', '', $array_script);
-            $array_of_keys_values=explode("]," , $final_string);
+            $array_script = $array_script->item($array_script->count() - 1)->nodeValue;
+            $array_script = explode('"dimensionValuesDisplayData"', $array_script)[1];
+            $array_script = explode("\n", $array_script)[0];
+            $final_string = preg_replace('/\s+[\{\}\:]/', '', $array_script);
+            $array_of_keys_values = explode("],", $final_string);
 
-            foreach ($array_of_keys_values as $single)
-            {
-                $key_value=explode(":[", Str::replace(['"' , ']},'], " " , $single));
-                $options[Str::replace(" ", "" , $key_value[0])]= $key_value[1];
+            foreach ($array_of_keys_values as $single) {
+                $key_value = explode(":[", Str::replace(['"', ']},'], " ", $single));
+                $options[Str::replace(" ", "", $key_value[0])] = $key_value[1];
             }
             return $options ?? [];
 
-        } catch (\Exception $e){
-                 error("couldn't get the variation");
+        } catch (\Exception $e) {
+            error("couldn't get the variation");
 
             Notification::make()
                 ->danger()
@@ -338,37 +364,36 @@ class Amazon extends MainStore
                 ->body("couldn't get the variation")
                 ->persistent()
                 ->send();
-            }
-//
-//
+        }
+        //
+        //
 
-    return  [];
+        return [];
     }
 
-    public static function insert_variation($variations , $store , $settings){
+    public static function insert_variation($variations, $store, $settings)
+    {
 
         try {
-            foreach ($variations as $single_variation)
-                {
-                    $store->products()->withPivot('notify_price')->updateOrCreate(
-                        ['asin'=>$single_variation],
-                        [
-                            'favourite' => $settings['favourite'],
-                            'lowest_within'=>$settings['lowest_within'],
-                            'max_notifications'=>$settings['max_notifications'],
-                            'snoozed_until'=>$settings['snoozed_until'],
-                            'status'=>$settings['status'],
-                            'only_official'=>$settings['only_official'],
-                            'stock'=>$settings['stock'],
-                        ],
-                        [
-                            'product_store.notify_price'=>$settings['notify_price'] * 100,
-                        ]
-                    );
-                }
+            foreach ($variations as $single_variation) {
+                $store->products()->withPivot('notify_price')->updateOrCreate(
+                    ['asin' => $single_variation],
+                    [
+                        'favourite'         => $settings['favourite'],
+                        'lowest_within'     => $settings['lowest_within'],
+                        'max_notifications' => $settings['max_notifications'],
+                        'snoozed_until'     => $settings['snoozed_until'],
+                        'status'            => $settings['status'],
+                        'only_official'     => $settings['only_official'],
+                        'stock'             => $settings['stock'],
+                    ],
+                    [
+                        'product_store.notify_price' => $settings['notify_price'] * 100,
+                    ]
+                );
+            }
 
-        }
-        catch (\Exception $e){
+        } catch (\Exception $e) {
             Notification::make()
                 ->warning()
                 ->title("Something Wrong Happened")
@@ -377,9 +402,9 @@ class Amazon extends MainStore
                 ->persistent()
                 ->send();
 
-            error("Something Wrong Happened while getting the variation for product".
-                    $settings['url'] . ",  Please share the following details:\n $e"
-                );
+            error("Something Wrong Happened while getting the variation for product" .
+                $settings['url'] . ",  Please share the following details:\n $e"
+            );
         }
     }
 
@@ -389,8 +414,7 @@ class Amazon extends MainStore
         try {
             $url->get_asin();
             return true;
-        }
-        catch (\Exception) {
+        } catch (\Exception) {
             Notification::make()
                 ->danger()
                 ->title("Unrecognized URL scheme")
@@ -406,17 +430,18 @@ class Amazon extends MainStore
 
     }
 
-    public static function is_product_unique(URLHelper $url  ,$record_id=null)
+    public static function is_product_unique(URLHelper $url, $record_id = null)
     {
-        $products_with_the_same_asin=Product::where('asin' , $url->get_asin());
-        if ($record_id)
-            $products_with_the_same_asin->whereNot('id' , $record_id);
+        $products_with_the_same_asin = Product::where('asin', $url->get_asin());
+        if ($record_id) {
+            $products_with_the_same_asin->whereNot('id', $record_id);
+        }
 
-        $product=$products_with_the_same_asin->first();
-        if (!$product)
+        $product = $products_with_the_same_asin->first();
+        if (!$product) {
             return true;
-        else{
-            $product_url=route("filament.admin.resources.products.edit" , $product->id) ;
+        } else {
+            $product_url = route("filament.admin.resources.products.edit", $product->id);
             Notification::make()
                 ->danger()
                 ->title("Existing Product")
@@ -434,6 +459,7 @@ class Amazon extends MainStore
     {
         return self::validate_amazon_url($url) && self::is_product_unique($url);
     }
+
     public function get_condition()
     {
         // TODO: Implement get_condition() method.
