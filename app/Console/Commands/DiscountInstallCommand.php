@@ -85,7 +85,8 @@ class DiscountInstallCommand extends Command
 
     public function handle()
     {
-
+        $this->info("currently suspended. setup is done in Makefile's target 'setup'");
+        return;
         \File::copy(".env.example" , ".env");
         \File::append(".env" , "\n\n\n");
 
@@ -213,9 +214,5 @@ class DiscountInstallCommand extends Command
             $this->setup_cron_windows($path, $os);
         elseif ($how_to_run=="terminal" && $os=="windows")
             $this->setup_terminal_windows($path, $os);
-
-
-
-
     }
 }

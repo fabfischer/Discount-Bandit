@@ -18,13 +18,3 @@ use Illuminate\Support\Facades\Route;
 */
 
 
-Route::get('/test', function () {
-        new \App\Classes\Stores\Amazon(35);
-});
-
-//Route::get("/" , function (){
-//    return view("homepage");
-//});
-
-//
-//Route::get("/test", [\App\Http\Controllers\ProductController::class ,"get_product"]);

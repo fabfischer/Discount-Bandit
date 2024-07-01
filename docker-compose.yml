@@ -5,41 +5,60 @@ networks:
         driver: bridge
 
 services:
-    discount-bandit:
-        image: cybrarist/discount-bandit:testarm
-        ports:
-            - 8080:80
-        networks:
-            - discount-bandit
-        environment:
-            DB_HOST: discount-bandit-mysql
-            DEFAULT_USER: "test"
-            DEFAULT_EMAIL: "docker@test.com"
-            DEAFULT_PASSWORD: "thisismypassword"
-            NTFY_LINK: "https://ntfy.sh/test"
-            NTFY_USER : ""
-            NTFY_PASSWORD : ""
-            NTFY_TOKEN : ""
+    nginx:
+        build:
+            context: ./docker/nginx
+            dockerfile: Dockerfile
         depends_on:
-            mysql :
-                condition: service_healthy
-
-    mysql:
-        image: mysql:8.2.0
-        container_name: discount-bandit-mysql
-        restart: unless-stopped
-        tty: true
+            - php-fpm
         ports:
-            - "3307:3306"
-        environment:
-            MYSQL_DATABASE: discount-bandit
-            MYSQL_USER: bandit
-            MYSQL_PASSWORD: password
-            MYSQL_ROOT_PASSWORD: password
-            SERVICE_NAME: mysql
-        healthcheck:
-            test: [ "CMD", "mysqladmin" ,"ping", "-h", "localhost" ]
-            timeout: 1s
-            retries: 10
+            - "${APP_PORT:-8765}:8765"
+        logging:
+            driver: "none"
         networks:
             - discount-bandit
+        volumes:
+            - './docker/nginx/nginx-default.conf:/etc/nginx/sites-enabled/default.conf'
+            - '.:/var/www/html'
+    php-fpm:
+        build:
+            context: ./docker/php-fpm
+            dockerfile: Dockerfile
+        restart: no
+        environment:
+            WWWUSER: '${WWWUSER}'
+            ADMIN_EMAIL: '${ADMIN_EMAIL}'
+            ADMIN_PASSWORD: '${ADMIN_PASSWORD}'
+            ADMIN_USERNAME: '${ADMIN_USERNAME}'
+            NTFY_LINK: "${NTFY_LINK}"
+            NTFY_USER: "${NTFY_USER}"
+            NTFY_PASSWORD: "${NTFY_PASSWORD}"
+            NTFY_TOKEN: "${NTFY_TOKEN}"
+        volumes:
+            - '.:/var/www/html'
+        networks:
+            - discount-bandit
+        depends_on:
+            - mariadb
+
+    mariadb:
+        image: 'mariadb:10'
+        ports:
+            - '${FORWARD_DB_PORT:-3306}:3306'
+        # Set max_allowed_packet to 256M
+        command: --max_allowed_packet=32505856 --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci --innodb_file_per_table=1
+        environment:
+            MYSQL_ROOT_PASSWORD: '${DB_PASSWORD}'
+            MYSQL_ROOT_HOST: "%"
+            MYSQL_DATABASE: '${DB_DATABASE}'
+            MYSQL_USER: '${DB_USERNAME}'
+            MYSQL_PASSWORD: '${DB_PASSWORD}'
+            MYSQL_ALLOW_EMPTY_PASSWORD: 'yes'
+        volumes:
+            - './docker/volumes/mariadb:/var/lib/mysql'
+        networks:
+            - discount-bandit
+        healthcheck:
+            test: [ "CMD", "mysqladmin", "ping", "-p${DB_PASSWORD}" ]
+            retries: 3
+            timeout: 5s

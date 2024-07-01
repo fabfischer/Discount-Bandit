@@ -29,28 +29,11 @@ class GroupDiscount extends Notification
 
     public function toNtfy($notifiable)
     {
-        $auth=[];
-
-        if (env("NTFY_USER") && env("NTFY_PASSWORD"))
-            $auth["Authorization"] = "Basic " . base64_encode(env("NTFY_USER") .":" . env("NTFY_PASSWORD") );
-        elseif (env("NTFY_TOKEN"))
-            $auth["Authorization"] = "Bearer " . env("NTFY_TOKEN");
-
-
-        \Http::withHeaders(
-            array_merge($auth ,
-                [
-                    "Content-Type"=>"text/markdown",
-                    'X-Markdown'=>"1",
-                    'Markdown'=>"1",
-                    'md'=>"1",
-                    "Cache: no",
-                    'Title'=>"Your Group '$this->group' Has Reached the Desired Price. $this->currency $this->current_price ",
-                ]
-            ))
-            ->withBody("Please refer to the website")
-            ->post(env("NTFY_LINK"));
-
+        Ntfy::send(
+            "Your Group '$this->group' Has Reached the Desired Price. $this->currency $this->current_price ",
+            "Please refer to the website",
+            "Please refer to the website"
+        );
     }
 
     /**

@@ -12,14 +12,14 @@ class ProductStoreSchedule
     public function __invoke()
     {
         try {
-            Log::info("Products Schedule Started");
+            // Log::info("Products Schedule Started");
 
             //clear all the jobs, in case of some items still remain after 5 mins.
             clear_job();
 
             //getting stores for the queue slug
-            $product_stores=DB::table('product_store')
-                ->join('stores', 'stores.id', '=' , 'store_id')
+            $product_stores = DB::table('product_store')
+                ->join('stores', 'stores.id', '=', 'store_id')
                 ->orderBy('product_store.updated_at')
                 ->select([
                     "product_store.id",
@@ -30,15 +30,18 @@ class ProductStoreSchedule
                 ])
                 ->get();
 
-            foreach ($product_stores as $index=>$product_store)
-                GetProductJob::dispatch($product_store->id , $product_store->domain)
-                    ->onQueue($product_store->slug)
-                    ->delay(now()->addSeconds($index*5));
+            foreach ($product_stores as $index => $product_store) {
+                $queue = $product_store->slug;
+                if (str_contains($queue, 'amazon')) {
+                    $queue = 'amazon';
+                }
+                GetProductJob::dispatch($product_store->id, $product_store->domain)
+                    ->onQueue($queue)
+                    ->delay(now()->addSeconds($index * 5));
+            }
 
-            Log::info("Products Schedule Finished Successfully");
-        }
-        catch (\Exception $e)
-        {
+            // Log::info("Products Schedule Finished Successfully");
+        } catch (\Exception $e) {
             Log::error("Couldn't Run the Product Schedule, Error: " . $e);
         }
     }

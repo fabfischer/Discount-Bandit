@@ -8,21 +8,19 @@ use Illuminate\Database\Eloquent\Relations\Pivot;
 
 class ProductStore extends Pivot
 {
-    //
-
-
-    protected $casts=[
-        'price'=>Money::class,
-        'notify_price'=>Money::class,
-        'shipping_price'=>Money::class,
+    protected $casts = [
+        'price'          => Money::class,
+        'notify_price'   => Money::class,
+        'shipping_price' => Money::class,
     ];
 
-    protected $guarded=[];
+    protected $guarded = [];
 
     public function product()
     {
         return $this->belongsTo(Product::class);
     }
+
     public function store()
     {
         return $this->belongsTo(Store::class);
@@ -30,6 +28,6 @@ class ProductStore extends Pivot
 
     public function stores_available()
     {
-        return $this->belongsTo(Store::class , 'store_id')->whereHas('products');
+        return $this->belongsTo(Store::class, 'store_id')->whereHas('products');
     }
 }
