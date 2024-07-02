@@ -20,7 +20,7 @@ return new class extends Migration
         }
 
         \Illuminate\Support\Facades\Artisan::call(
-            'db:seed --class=DatabaseSeeder'
+            'db:seed --class=DatabaseSeeder --force'
         );
 
         \Illuminate\Support\Facades\Artisan::call(
