@@ -7,7 +7,6 @@ use Awcodes\FilamentQuickCreate\QuickCreatePlugin;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
-use Filament\Pages;
 use Filament\Panel;
 use Filament\PanelProvider;
 use Filament\Widgets\AccountWidget;
@@ -77,6 +76,7 @@ class AdminPanelProvider extends PanelProvider
                     ->usingPage(Backups::class),
                 FilamentSpatieLaravelHealthPlugin::make(),
                 FilamentLogManager::make(),
+                FilamentApexChartsPlugin::make(),
             ]);
 
     }

@@ -175,7 +175,7 @@ abstract class MainStore
                 ]);
             }
 
-            // Log:info('Price History', ['price' => $price, 'history' => $history->price]);
+            Log:info('Price History', ['price' => $price, 'history' => $history->price]);
             if ($history->price !== $price) {
                 /*$history->update([
                     'price' => $price
@@ -189,7 +189,7 @@ abstract class MainStore
             }
 
         } catch (\Exception $e) {
-            Log::error("Couldn't update the price history");
+            Log::error("Couldn't update the price history. Reason: " . $e->getMessage(), ['error' => $e]);
         }
     }
 

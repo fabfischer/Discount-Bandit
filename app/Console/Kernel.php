@@ -15,8 +15,8 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule): void
     {
-        // $schedule->call(new ProductStoreSchedule)->everyMinute();
-        $schedule->call(new ProductStoreSchedule)->everyFiveMinutes();
+        $schedule->call(new ProductStoreSchedule)->everyMinute();
+        // $schedule->call(new ProductStoreSchedule)->everyFiveMinutes();
         $schedule->call(new GroupSchedule)->everyTenMinutes();
 
         $schedule->command('notification:clear')->daily();

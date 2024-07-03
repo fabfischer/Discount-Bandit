@@ -9,13 +9,9 @@ use Leandrocfe\FilamentApexCharts\Widgets\ApexChartWidget;
 class PriceHistoryChart extends ApexChartWidget
 {
     public ?Model $record = null;
+    protected static bool $deferLoading = true;
 
-    /**
-     * Chart Id
-     *
-     * @var string
-     */
-    protected static string $chartId = "priceHistoryChart";
+    protected static ?string $chartId = "priceHistoryChart";
 
     /**
      * Widget Title
@@ -23,7 +19,6 @@ class PriceHistoryChart extends ApexChartWidget
      * @var string|null
      */
     protected static ?string $heading = 'Price History';
-
 
     protected int|string|array $columnSpan = 'full';
 
@@ -116,6 +111,6 @@ class PriceHistoryChart extends ApexChartWidget
             ];
 
         }
+        return [];
     }
-
 }

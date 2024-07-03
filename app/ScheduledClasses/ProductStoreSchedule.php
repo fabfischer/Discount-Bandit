@@ -2,7 +2,7 @@
 
 namespace App\ScheduledClasses;
 
-use App\Jobs\GetProductJob;
+use App\Helper\QueueHelper;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
@@ -31,13 +31,14 @@ class ProductStoreSchedule
                 ->get();
 
             foreach ($product_stores as $index => $product_store) {
-                $queue = $product_store->slug;
+                QueueHelper::dispatchProductJob($product_store);
+                /*$queue = $product_store->slug;
                 if (str_contains($queue, 'amazon')) {
                     $queue = 'amazon';
                 }
                 GetProductJob::dispatch($product_store->id, $product_store->domain)
                     ->onQueue($queue)
-                    ->delay(now()->addSeconds($index * 5));
+                    ->delay(now()->addSeconds($index * 5));*/
             }
 
             // Log::info("Products Schedule Finished Successfully");

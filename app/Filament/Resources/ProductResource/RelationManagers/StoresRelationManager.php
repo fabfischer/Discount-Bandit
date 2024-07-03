@@ -7,6 +7,7 @@ use App\Classes\Stores\Amazon;
 use App\Classes\Stores\Ebay;
 use App\Classes\Stores\Walmart;
 use App\Enums\StatusEnum;
+use App\Helper\UrlHelper;
 use App\Models\PriceHistory;
 use App\Models\ProductStore;
 use App\Models\Store;
@@ -18,6 +19,7 @@ use Filament\Tables;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use http\Url;
 
 class StoresRelationManager extends RelationManager
 {
@@ -34,25 +36,18 @@ class StoresRelationManager extends RelationManager
             ]);
     }
 
-
-
     public function table(Table $table): Table
     {
 
         return $table
+            ->paginationPageOptions([50, 100, 250, 500])
             ->allowDuplicates()
             ->recordTitleAttribute('name')
             ->columns([
                 Tables\Columns\TextColumn::make('name')
                     ->color("warning")
                     ->url( function ($record) {
-                        //todo make static function for the following
-                        if ( MainStore::is_amazon($record->domain))
-                            return Amazon::prepare_url($record->domain , $this->ownerRecord->asin ,Amazon::MAIN_URL, $record->referral);
-                        elseif ( MainStore::is_ebay($record->domain))
-                            return Ebay::prepare_url($record->domain , $record->ebay_id ,Ebay::MAIN_URL , $record->referral);
-                        elseif ( MainStore::is_walmart($record->domain))
-                            return Walmart::prepare_url($record->domain , $this->ownerRecord->walmart_ip ,$record->referral);
+                        return UrlHelper::generateUrl($this->ownerRecord, $record);
                     } ,true),
 
                 Tables\Columns\TextColumn::make('price')

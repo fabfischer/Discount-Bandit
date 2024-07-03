@@ -3,8 +3,8 @@
 namespace App\Filament\Resources\ProductResource\Pages;
 
 use App\Filament\Resources\ProductResource;
-use App\Jobs\GetProductJob;
-use Carbon\Carbon;
+use App\Filament\Resources\ProductResource\Widgets\PriceHistoryChart;
+use App\Helper\QueueHelper;
 use Filament\Notifications\Notification;
 use Filament\Pages\Actions;
 use Filament\Resources\Pages\ViewRecord;
@@ -21,15 +21,16 @@ class ViewProduct extends ViewRecord
             Actions\DeleteAction::make(),
             Actions\Action::make('Fetch')->color('primary')->action(function ($record) {
                 try {
-                    $services = $this->record->services;
-                    foreach ($services as $service) {
-                        GetProductJob::dispatch(
-                            $this->record->id,
-                            $service->id,
-                            $service->currency->code,
-                            $service->pivot->notify_price,
-                            $service->pivot->price)
-                            ->delay(Carbon::now()->addSeconds(10));
+                    $stores = $record->stores;
+                    foreach ($stores as $store) {
+                        QueueHelper::dispatchProductJob($store?->getModel(), $record);
+                        /*GetProductJob::dispatch(
+                            $record->id,
+                            $store->id,
+                            $store->currency->code,
+                            $store->pivot->notify_price,
+                            $store->pivot->price)
+                            ->delay(Carbon::now()->addSeconds(10));*/
                     }
 
                     Notification::make()
@@ -37,7 +38,7 @@ class ViewProduct extends ViewRecord
                         ->success()
                         ->send();
                 } catch (\Exception $e) {
-                    Log::error("Couldn't fetch the job with error : $e");
+                    Log::error("Couldn't fetch the job with error : $e" . json_encode($record));
                     Notification::make()
                         ->title("Couldn't fetch the product, refer to logs")
                         ->danger()
@@ -45,5 +46,20 @@ class ViewProduct extends ViewRecord
                 }
             }),
         ];
+    }
+
+    protected function getFooterWidgets(): array
+    {
+        if ($this->getRecord()->stores()->count()) {
+            return [
+                PriceHistoryChart::class,
+            ];
+        }
+        return [];
+    }
+
+    public function getTitle(): string
+    {
+        return $this->record?->name;
     }
 }

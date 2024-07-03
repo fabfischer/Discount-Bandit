@@ -8,12 +8,13 @@ use App\Classes\Stores\Argos;
 use App\Classes\Stores\Ebay;
 use App\Classes\Stores\Walmart;
 use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 
-class GetProductJob implements ShouldQueue
+class GetProductJob implements ShouldQueue, ShouldBeUnique
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
@@ -40,5 +41,17 @@ class GetProductJob implements ShouldQueue
         } elseif (MainStore::is_argos($this->domain)) {
             new Argos($this->product_store_id);
         }
+    }
+
+    /**
+     * The number of seconds after which the job's unique lock will be released.
+     *
+     * @var int
+     */
+    public $uniqueFor = 3600;
+
+    public function uniqueId(): string
+    {
+        return $this->product_store_id;
     }
 }

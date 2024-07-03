@@ -67,7 +67,6 @@ class EditProduct extends EditRecord
         $extra_keys = [];
         $extra_data = ['notify_price' => $data['notify_price'] ?? null,];
 
-
         if ($data['url']) {
             $url = new URLHelper($data['url']);
 
@@ -104,7 +103,6 @@ class EditProduct extends EditRecord
         if ($this->getRecord()->stores()->count()) {
             return [
                 PriceHistoryChart::class,
-                //                BlogCommentsChart::class
             ];
         }
         return [];

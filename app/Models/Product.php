@@ -6,6 +6,9 @@ use App\Casts\Money;
 use App\Enums\StatusEnum;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Product extends Model
@@ -21,12 +24,12 @@ class Product extends Model
         'stores.pivot.updated_at'     => 'datetime',
     ];
 
-    public function categories()
+    public function categories(): BelongsToMany
     {
         return $this->belongsToMany(Category::class)->withTimestamps();
     }
 
-    public function stores()
+    public function stores(): BelongsToMany
     {
         return $this->belongsToMany(Store::class)->withTimestamps()->withPivot([
             "id",
@@ -46,29 +49,41 @@ class Product extends Model
         ]);
     }
 
-    public function variations()
+    public function variations(): HasMany
     {
         return $this->hasMany(Product::class);
     }
 
 
-    public function parent_variation()
+    public function parent_variation(): BelongsTo
     {
         return $this->belongsTo(Product::class, 'id', 'product_id');
     }
 
-    public function product_store()
+    public function product_store(): HasMany
     {
         return $this->hasMany(ProductStore::class, 'product_id', 'id');
     }
 
-    public function stores_available()
+    public function stores_available(): BelongsTo
     {
         return $this->belongsTo(Store::class, 'store_id')->whereHas('products');
     }
 
-    public function groups()
+    public function groups(): BelongsToMany
     {
         return $this->belongsToMany(Group::class)->withTimestamps()->withPivot("key");
+    }
+
+    public function price_history(): HasMany
+    {
+        return $this->hasMany(PriceHistory::class, 'product_id', 'id');
+    }
+
+    public function last_price_history(): HasMany
+    {
+        return $this->hasMany(PriceHistory::class, 'product_id', 'id')
+            ->orderBy('created_at', 'desc')
+            ->limit(5);
     }
 }
