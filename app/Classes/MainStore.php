@@ -167,7 +167,7 @@ abstract class MainStore
                 ->first();
 
             if (!$history) {
-                PriceHistory::create([
+                $history = PriceHistory::create([
                     'product_id' => $product_id,
                     'store_id'   => $store_id,
                     'date'       => \Carbon\Carbon::today()->toDateString(),
