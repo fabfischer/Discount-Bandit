@@ -17,6 +17,7 @@ use Carbon\Carbon;
 use Filament\Notifications\Notification;
 use http\Message\Body;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
@@ -175,8 +176,9 @@ abstract class MainStore
                 ]);
             }
 
-            Log:info('Price History', ['price' => $price, 'history' => $history->price]);
-            if ($history->price !== $price) {
+            Log:
+            info('Price History', ['price' => $price, 'history' => $history->price]);
+            if ((float)$history->price !== (float)$price) {
                 /*$history->update([
                     'price' => $price
                 ]);*/
@@ -229,12 +231,18 @@ abstract class MainStore
         );
     }
 
-    protected function get_record($product_store_id)
+    protected function get_record($product_store_id): void
     {
-        $this->current_record = ProductStore::with([
+        $productStore = ProductStore::with([
             "product",
             "store"
         ])->find($product_store_id);
+
+        if ($productStore instanceof ProductStore) {
+            $this->current_record = $productStore;
+        } else {
+            Log::error("Couldn't find the product store with id: $product_store_id");
+        }
     }
 
     public function update_product_details($product_id, $data)
@@ -291,22 +299,22 @@ abstract class MainStore
 
     public static function is_amazon($domain)
     {
-        return \Str::contains($domain, "amazon", true);
+        return Str::contains($domain, "amazon", true);
     }
 
     public static function is_ebay($domain)
     {
-        return \Str::contains($domain, "ebay", true);
+        return Str::contains($domain, "ebay", true);
     }
 
     public static function is_walmart($domain)
     {
-        return \Str::contains($domain, "walmart", true);
+        return Str::contains($domain, "walmart", true);
     }
 
     public static function is_argos($domain)
     {
-        return \Str::contains($domain, "argos", true);
+        return Str::contains($domain, "argos", true);
     }
 
     public static function is_diy($domain)
@@ -314,7 +322,7 @@ abstract class MainStore
         return Str::contains($domain, "diy.com", true);
     }
 
-    public static function validate_url(URLHelper $url)
+    public static function validate_url(URLHelper $url): bool
     {
         if (self::is_amazon($url->domain)) {
             return Amazon::validate($url);
@@ -334,7 +342,7 @@ abstract class MainStore
                 ->persistent()
                 ->send();
         }
-
+        return false;
     }
 
 
@@ -377,7 +385,7 @@ abstract class MainStore
             ]);
         } elseif (self::is_ebay($url->domain)) {
             //check if the ebay id exists
-            $product_store = \DB::table("product_store")
+            $product_store = DB::table("product_store")
                 ->where("store_id", "=", 23)
                 ->where("ebay_id", $url->get_ebay_item_id())
                 ->first();

@@ -455,7 +455,7 @@ class Amazon extends MainStore
     }
 
 
-    public static function validate($url)
+    public static function validate($url): bool
     {
         return self::validate_amazon_url($url) && self::is_product_unique($url);
     }
