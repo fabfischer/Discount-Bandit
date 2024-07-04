@@ -14,6 +14,7 @@ use App\Models\Store;
 use Filament\Actions;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\EditRecord;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
@@ -67,8 +68,17 @@ class EditProduct extends EditRecord
         $extra_keys = [];
         $extra_data = ['notify_price' => $data['notify_price'] ?? null,];
 
-        if ($data['url']) {
-            $url = new URLHelper($data['url']);
+        $url = null;
+        // try to get product by name
+        if (isset($data['name'])) {
+            $product = Product::where('name', $data['name'])->first();
+            if ($product) {
+                $url = new URLHelper($product->url);
+            }
+        }
+
+        if ($url) {
+            // $url = new URLHelper($data['url']);
 
             //validate the url and check for duplicates
             if (!MainStore::validate_url($url)) {
@@ -86,7 +96,7 @@ class EditProduct extends EditRecord
 
             } elseif (MainStore::is_ebay($url->domain)) {
                 $extra_keys = ['ebay_id' => $url->get_ebay_item_id()];
-                $extra_data = \Arr::add($extra_data, 'remove_if_sold', $data['remove_if_sold'] ?? null);
+                $extra_data = Arr::add($extra_data, 'remove_if_sold', $data['remove_if_sold'] ?? null);
             }
 
             MainStore::insert_other_store(domain: $url->domain, product_id: $this->record->id, extra_keys: $extra_keys,
@@ -95,7 +105,7 @@ class EditProduct extends EditRecord
         }
 
 
-        return \Arr::except($data, ["url"]);
+        return Arr::except($data, ["url"]);
     }
 
     protected function getFooterWidgets(): array
@@ -106,6 +116,5 @@ class EditProduct extends EditRecord
             ];
         }
         return [];
-
     }
 }

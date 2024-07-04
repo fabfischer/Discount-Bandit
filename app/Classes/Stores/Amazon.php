@@ -88,17 +88,18 @@ class Amazon extends MainStore
         $this->get_seller();
         $this->get_shipping_price();
 
-        if (empty($this->price)) {
-            Ntfy::send(
-                "Couldn't get the price",
-                "The price couldn't be fetched for the following product",
-                "The product is $this->name"
-            );
-        }
+
 
         $product = Product::find($this->current_record->product_id);
         $name = ($product) ? $product->name : $this->current_record->product_id;
         // Log::info("Product: $name crawled successfully");
+        if (empty($this->price)) {
+            Ntfy::send(
+                "Couldn't get the price",
+                "The price couldn't be fetched for the following product",
+                "The product with the name/id $name couldn't be fetched"
+            );
+        }
 
         $this->current_record->update([
             'price'              => (float)$this->price,

@@ -179,8 +179,8 @@ abstract class MainStore
             }
 
             Log:
-            info('Price History', ['price' => $price, 'history' => $history->price]);
             if ((float)$history->price !== (float)$price) {
+                info('Price History', ['price' => (float)$price, 'history' => (float)$history->price]);
                 /*$history->update([
                     'price' => $price
                 ]);*/
