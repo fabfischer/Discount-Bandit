@@ -60,6 +60,6 @@ class ViewProduct extends ViewRecord
 
     public function getTitle(): string
     {
-        return $this->record?->name;
+        return $this->record && $this->record?->name ? $this->record?->name : 'View Product';
     }
 }

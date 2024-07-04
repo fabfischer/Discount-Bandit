@@ -281,17 +281,17 @@ class ProductResource extends Resource
                     ->onIcon("heroicon-s-star")
                     ->offIcon("heroicon-o-star"),
 
-                TextColumn::make('stores.updated_at')
+                TextColumn::make('product_store.updated_at')
                     ->formatStateUsing(function ($record) {
                         return prepare_multiple_update_in_table($record);
                     })
+                    ->sortable()
                     ->label('Last Update'),
 
 
             ])
             ->defaultSort('favourite', 'desc')
             ->filters([
-
                 SelectFilter::make('stores')
                     ->relationship('stores_available', 'name')
                     ->preload()
@@ -320,12 +320,11 @@ class ProductResource extends Resource
                     ->label('Favourite product')
                     ->toggle(),
 
-            ])->filtersLayout(Tables\Enums\FiltersLayout::AboveContent)->deferLoading(true)
+            ])
             ->actions([
                 Tables\Actions\ViewAction::make(),
                 Tables\Actions\EditAction::make(),
                 Tables\Actions\DeleteAction::make(),
-
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
