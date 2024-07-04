@@ -4,9 +4,13 @@ namespace App\Classes;
 
 use App\Classes\Stores\Amazon;
 use Filament\Notifications\Notification;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Str;
 
+/**
+ * @todo: merge with UrlHelper in app/Helper/UrlHelper.php
+ */
 class URLHelper
 {
     public string $final_url;
@@ -15,9 +19,17 @@ class URLHelper
 
     public function __construct($url)
     {
+        if (!$url) {
+            Notification::make()
+                ->title('Invalid URL')
+                ->danger()
+                ->send();
+            // return;
+        }
+
         $parsed_url = parse_url($url);
 
-        $this->domain = \Str::lower(\Str::replace("www.", "", $parsed_url['host']));
+        $this->domain = Str::lower(Str::replace("www.", "", $parsed_url['host']));
         $remove_ref_if_exists = explode("/ref", $parsed_url['path'] ?? "");
         $this->path = $remove_ref_if_exists[0] ?? "";
         $this->final_url = "https://$this->domain$this->path";
@@ -26,13 +38,13 @@ class URLHelper
     public function fill_data(&$data): void
     {
         if (MainStore::is_amazon($this->domain)) {
-            $data = \Arr::add($data, 'asin', $this->get_asin());
+            $data = Arr::add($data, 'asin', $this->get_asin());
         } elseif (MainStore::is_ebay($this->domain)) {
-            $data = \Arr::add($data, 'ebay_id', $this->get_ebay_item_id());
+            $data = Arr::add($data, 'ebay_id', $this->get_ebay_item_id());
         } elseif (MainStore::is_walmart($this->domain)) {
-            $data = \Arr::add($data, 'walmart_ip', $this->get_walmart_ip());
+            $data = Arr::add($data, 'walmart_ip', $this->get_walmart_ip());
         } elseif (MainStore::is_argos($this->domain)) {
-            $data = \Arr::add($data, 'argos_id', $this->get_argos_product_id());
+            $data = Arr::add($data, 'argos_id', $this->get_argos_product_id());
         } elseif (MainStore::is_diy($this->domain)) {
             $data["key"] = $this->get_diy_id();
         }
@@ -63,11 +75,11 @@ class URLHelper
 
     public function get_walmart_ip(): string
     {
-        return Str::remove("/", Str::squish(\Arr::last(explode("/", $this->path))));
+        return Str::remove("/", Str::squish(Arr::last(explode("/", $this->path))));
     }
 
     public function get_argos_product_id(): string
     {
-        return Str::remove("/", Str::squish(\Arr::last(explode("/", $this->path))));
+        return Str::remove("/", Str::squish(Arr::last(explode("/", $this->path))));
     }
 }

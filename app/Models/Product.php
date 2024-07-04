@@ -4,6 +4,8 @@ namespace App\Models;
 
 use App\Casts\Money;
 use App\Enums\StatusEnum;
+use App\Helper\UrlHelper;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -16,6 +18,7 @@ class Product extends Model
     use HasFactory;
 
     protected $guarded = ['id'];
+    protected $appends = ['url'];
     protected $casts = [
         'status'                      => StatusEnum::class,
         'stores.pivot.price'          => Money::class,
@@ -85,5 +88,28 @@ class Product extends Model
         return $this->hasMany(PriceHistory::class, 'product_id', 'id')
             ->orderBy('created_at', 'desc')
             ->limit(5);
+    }
+
+    protected function url(): Attribute
+    {
+        return Attribute::make(
+            get: function(mixed $value, array $attributes) {
+                $record = Product::find($attributes['id']);
+                // get first store
+                $productStore = $record->product_store->first();
+                if (!$productStore) {
+                    return null;
+                }
+                $store = $productStore->store;
+                if (!$store) {
+                    return null;
+                }
+
+                return UrlHelper::generateUrl(
+                    $record,
+                    $store
+                );
+            },
+        );
     }
 }

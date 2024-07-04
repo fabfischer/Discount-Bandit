@@ -4,7 +4,6 @@ namespace App\Classes\Stores;
 
 use App\Classes\MainStore;
 use App\Classes\URLHelper;
-use App\Interfaces\StoreInterface;
 use App\Models\Product;
 use App\Models\ProductStore;
 use App\Models\User;
@@ -15,7 +14,6 @@ use Exception;
 use Filament\Notifications\Notification;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
-use function App\Classes\error;
 
 class Amazon extends MainStore
 {
@@ -25,6 +23,9 @@ class Amazon extends MainStore
 
     public function __construct($product_store_id)
     {
+        if (!$product_store_id) {
+            return;
+        }
         parent::get_record($product_store_id);
 
         //prepare the url template
@@ -339,7 +340,8 @@ class Amazon extends MainStore
 
     public static function get_variations($url): array
     {
-        $response = self::get_website($url);
+        $storeInstance = new Amazon(null);
+        $response = $storeInstance->crawl_url($url, true);
         self::prepare_dom($response, $document, $xml);
         try {
             $array_script = $document->getElementById("twister_feature_div")->getElementsByTagName("script");
@@ -356,7 +358,7 @@ class Amazon extends MainStore
             return $options ?? [];
 
         } catch (\Exception $e) {
-            error("couldn't get the variation");
+            Log::error("couldn't get the variation for the following url $url \n");
 
             Notification::make()
                 ->danger()
@@ -402,7 +404,7 @@ class Amazon extends MainStore
                 ->persistent()
                 ->send();
 
-            error("Something Wrong Happened while getting the variation for product" .
+            Log::error("Something Wrong Happened while getting the variation for product" .
                 $settings['url'] . ",  Please share the following details:\n $e"
             );
         }

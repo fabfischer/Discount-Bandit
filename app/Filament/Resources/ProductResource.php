@@ -54,7 +54,10 @@ class ProductResource extends Resource
                 TextInput::make('url')
                     ->required(function ($operation) {
                         return $operation == "create";
-                    })->url()
+                    })
+                    ->url()
+                    ->disabledOn(['edit'])
+                    ->readOnlyOn(['edit'])
                     ->activeUrl()
                     ->label('URL of product')
                     ->live(onBlur: true)
@@ -63,7 +66,8 @@ class ProductResource extends Resource
                             $url = new URLHelper($state);
                             MainStore::validate_url($url);
                         }
-                    }),
+                    })
+                ,
 
                 Select::make('status')
                     ->options(StatusEnum::class)

@@ -15,7 +15,9 @@ use App\Models\User;
 use App\Notifications\ProductDiscount;
 use Carbon\Carbon;
 use Filament\Notifications\Notification;
+use GuzzleHttp\Promise\PromiseInterface;
 use http\Message\Body;
+use Illuminate\Http\Client\Response;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
@@ -197,19 +199,23 @@ abstract class MainStore
 
 
     //shared functions across the stores
-    public function crawl_url()
+    public function crawl_url(?string $url = null, bool $returnResponse = false): Response|PromiseInterface|null
     {
+        $url = $url ?? $this->product_url;
         $maxAttempts = 0;
         $retryCount = 0;
         $done = false;
         do {
             try {
-                $response = self::get_website($this->product_url);
+                $response = self::get_website($url);
                 $body = $response->toPsrResponse()->getBody();
 
                 if ($this->responseIsCaptchaBlocked($body) === true) {
                     sleep(5);
                     continue;
+                }
+                if ($returnResponse) {
+                    return $response;
                 }
                 $done = self::prepare_dom($response->body(), $this->document, $this->xml);
             } catch (\Exception $exception) {
@@ -220,6 +226,7 @@ abstract class MainStore
         } while ($done === false && $retryCount <= $maxAttempts);
         /*$response = self::get_website($this->product_url);
         self::prepare_dom($response, $this->document, $this->xml);*/
+        return null;
     }
 
     protected function responseIsCaptchaBlocked(string $responseBody): bool
@@ -272,11 +279,10 @@ abstract class MainStore
     {
         //if the price is less than the notify price and consider the shipping option
         if ($this->current_record->add_shipping) {
-            return $this->shipping_price + $this->price <= $this->current_record->notify_price;
-        } else {
-            return $this->price <= $this->current_record->notify_price;
+            return ((float)$this->shipping_price + (float)$this->price) <= (float)$this->current_record?->notify_price;
         }
 
+        return (float)$this->price <= (float)$this->current_record->notify_price;
     }
 
     public function max_notification_reached(): bool

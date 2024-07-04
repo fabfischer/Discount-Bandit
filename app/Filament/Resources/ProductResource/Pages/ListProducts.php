@@ -31,35 +31,19 @@ class ListProducts extends ListRecords
         $categories = Category::all();
         foreach ($categories as $category) {
             $tabs = Arr::add($tabs, $category->name, Tab::make()->modifyQueryUsing(function (Builder $query) use ($category) {
-                $query->join('category_product', 'category_product.product_id', '=', 'products.id')
-                    ->where('category_product.category_id', $category->id);
+                $query->whereHas('categories', function ($query) use ($category) {
+                    $query->where([
+                        'categories.id' => $category->id,
+                    ]);
+                });
             }));
         }
-
-
-        /*$stores = Cache::get('stores_available');
-        if (!$stores) {
-            $stores = Store::whereNotIn('status', StatusEnum::ignored())
-                ->where('tabs', true)->get();
-            Cache::set('stores_available', $stores, 60 * 60 * 24);
-        }
-
-        foreach ($stores as $store) {
-            $tabs = Arr::add($tabs, $store->name,
-                ListRecords\Tab::make()->modifyQueryUsing(function (Builder $query) use ($store) {
-                    $query->whereHas('stores', function ($query) use ($store) {
-                        $query->where([
-                            'stores.id' => $store->id,
-                        ]);
-                    });
-                })
-            );
-        }*/
         return $tabs;
     }
 
     public function getTableQueryForExport(): Builder
     {
         // TODO: Implement getTableQueryForExport() method.
+        return $this->getTableQuery();
     }
 }
