@@ -31,7 +31,7 @@ class GroupDiscount extends Notification
     {
         Ntfy::send(
             "Your Group '$this->group' Has Reached the Desired Price. $this->currency $this->current_price ",
-            "Please refer to the website",
+            "",
             "Please refer to the website"
         );
     }

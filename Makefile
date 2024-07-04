@@ -42,6 +42,6 @@ shell-root:
 migrations.migrate:
 	docker-compose exec -u www-data php-fpm php artisan migrate --force
 
-.PHONY: restart-worker
-restart-worker:
+.PHONY: worker.restart
+worker.restart:
 	docker-compose exec php-fpm supervisorctl restart laravel-worker:*

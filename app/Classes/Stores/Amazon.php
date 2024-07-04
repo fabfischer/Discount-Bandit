@@ -47,8 +47,8 @@ class Amazon extends MainStore
             );
             Ntfy::send(
                 "Couldn't Crawl the website",
-                "The following url couldn't be crawled",
-                "The error message is $message"
+                "",
+                "The following url couldn't be crawled. The error message is $message"
             );
             return;
         }
@@ -95,8 +95,8 @@ class Amazon extends MainStore
         // Log::info("Product: $name crawled successfully");
         if (empty($this->price)) {
             Ntfy::send(
-                "Couldn't get the price",
-                "The price couldn't be fetched for the following product",
+                "Couldn't get the price [$name]",
+                "",
                 "The product with the name/id $name couldn't be fetched"
             );
         }

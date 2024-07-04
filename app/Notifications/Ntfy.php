@@ -26,6 +26,7 @@ class Ntfy
             "Cache: no",
             'Title'        => $title,
             "Actions"      => $actions,
+            "Tags"         => "email",
         ];
         if ($attachment) {
             $details["Attach"] = $attachment;
