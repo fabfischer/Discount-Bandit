@@ -56,7 +56,7 @@ class Ebay extends MainStore
             $this->information= \Arr::keyBy($this->information , '@type')['Product'];
 
         }catch (\Exception $e){
-            $this->throw_error("Information Crawling");
+            $this->logFailure("Information Crawling");
         }
 
         try {
@@ -67,7 +67,7 @@ class Ebay extends MainStore
         }
         catch (\Exception $e)
         {
-            $this->throw_error("Crawl The Website");
+            $this->logFailure("Crawl The Website");
             return;
         }
     }
@@ -126,14 +126,14 @@ class Ebay extends MainStore
             return;
         }
         catch ( Exception $e) {
-            $this->throw_error("First Method Name");
+            $this->logFailure("First Method Name");
         }
 
         try {
             $this->name=$this->right_column->xpath("//h1[@class='x-item-title__mainTitle']//span")[0]->__toString();
         }
         catch ( Exception $e) {
-            $this->throw_error("Second Method Name");
+            $this->logFailure("Second Method Name");
             $this->name="NA";
         }
 
@@ -144,7 +144,7 @@ class Ebay extends MainStore
             $this->image = $this->information->image ?? "NA";
         }
         catch ( Exception $e) {
-            $this->throw_error("Image First Method");
+            $this->logFailure("Image First Method");
             $this->image = "";
         }
     }
@@ -154,7 +154,7 @@ class Ebay extends MainStore
         }
         catch (\Exception  $e )
         {
-            $this->throw_error("Price First Method");
+            $this->logFailure("Price First Method");
             $this->price=0;
         }
 
@@ -164,7 +164,7 @@ class Ebay extends MainStore
             $schema=Str::lower( \Arr::last( explode("/" , $this->information->offers->availability)));
             ($schema=="instock") ? $this->in_stock = true : $this->in_stock=false;
         } catch (\Exception $e){
-            $this->throw_error("Stock Availability");
+            $this->logFailure("Stock Availability");
             $this->in_stock = true;
         }
 
@@ -175,7 +175,7 @@ class Ebay extends MainStore
         }
         catch (\Error | \Exception $e )
         {
-            $this->throw_error("The Seller First Method");
+            $this->logFailure("The Seller First Method");
         }
 
         try {
@@ -183,7 +183,7 @@ class Ebay extends MainStore
         }
         catch (\Error | \Exception $e )
         {
-            $this->throw_error("The Seller Second Method");
+            $this->logFailure("The Seller Second Method");
             $this->seller="NA";
         }
 
@@ -195,7 +195,7 @@ class Ebay extends MainStore
             $this->condition=Str::squish(Str::replace('condition' , '' ,  Str::headline($schema), false));
         }  catch (Exception $e)
         {
-            $this->throw_error("The Condition ");
+            $this->logFailure("The Condition ");
             $this->condition="New";
         }
     }
@@ -204,7 +204,7 @@ class Ebay extends MainStore
         try{
             $this->shipping_price= (float) ($this->information->offers->shippingDetails->shippingRate->value);
         }catch (\Exception $e){
-            $this->throw_error("Shipping Price");
+            $this->logFailure("Shipping Price");
             $this->shipping_price=0;
         }
     }

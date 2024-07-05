@@ -180,7 +180,8 @@ abstract class MainStore
 
             Log:
             if ((float)$history->price !== (float)$price) {
-                info('Price History', ['price' => (float)$price, 'history' => (float)$history->price]);
+                $product = Product::find($product_id);
+                info('Price History for ' . $product?->name, ['new Price' => (float)$price, 'old Price' => (float)$history->price]);
                 /*$history->update([
                     'price' => $price
                 ]);*/
@@ -270,7 +271,7 @@ abstract class MainStore
                     image: $this->current_record->product->image ?? $this->image,
                     currency: get_currencies($this->current_record->store->currency_id)));
         } catch (\Exception $e) {
-            $this->throw_error("Send Notification");
+            $this->logFailure("Send Notification", $e->getMessage(), 'error');
         }
     }
 
@@ -298,9 +299,14 @@ abstract class MainStore
     }
 
 
-    public function throw_error($part): void
+    public function logFailure($part, ?string $reason = null, string $level = 'error'): void
     {
-        Log::error("Couldn't get the $part for the following url : $this->product_url");
+        $logMethod = $level;
+        $message = "Couldn't get the $part for the following url : $this->product_url";
+        if ($reason) {
+            $message .= " / Reason: $reason";
+        }
+        Log::$logMethod($message);
     }
 
     public static function is_amazon($domain)

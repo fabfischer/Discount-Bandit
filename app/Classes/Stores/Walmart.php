@@ -53,7 +53,7 @@ class Walmart extends MainStore
             $product_info= $this->xml->xpath("//script[@type='application/ld+json']")[0];
             $this->information=json_decode($product_info);
         }catch (Exception $e){
-            $this->throw_error("Couldn't Crawl Walmart Product");
+            $this->logFailure("Couldn't Crawl Walmart Product");
         }
 
     }
@@ -107,14 +107,14 @@ class Walmart extends MainStore
             return;
         }
         catch (Error | Exception $e){
-            $this->throw_error("Product Name First Method");
+            $this->logFailure("Product Name First Method");
         }
 
         try {
             $this->name = $this->document->getElementById("main-title")->textContent;
         }
         catch ( Error | Exception $e) {
-            $this->throw_error("Product Name Second Method");
+            $this->logFailure("Product Name Second Method");
             $this->name = "NA";
         }
     }
@@ -124,7 +124,7 @@ class Walmart extends MainStore
             $this->image = $this->information->image;
         }
         catch ( Error | Exception $e) {
-            $this->throw_error("The Image");
+            $this->logFailure("The Image");
             $this->image = "";
         }
 
@@ -137,14 +137,14 @@ class Walmart extends MainStore
         }
         catch ( Error | \Exception  $e )
         {
-            $this->throw_error("First Method Price");
+            $this->logFailure("First Method Price");
         }
         try {
             $this->price = self::get_numbers_only_with_dots($this->xml->xpath("//span[@itemprop='price']")[0]->__toString());
         }
         catch ( Error | \Exception  $e )
         {
-            $this->throw_error("Second Method Price");
+            $this->logFailure("Second Method Price");
             $this->price=0;
         }
     }
@@ -152,7 +152,7 @@ class Walmart extends MainStore
         try {
             $this->in_stock =  (Str::contains($this->information->offers->availability , "instock" , true));
         }catch (\Exception $e){
-            $this->throw_error( "Stock");
+            $this->logFailure( "Stock");
             $this->in_stock=true;
         }
     }
@@ -163,14 +163,14 @@ class Walmart extends MainStore
         }
         catch (Error | Exception $e)
         {
-            $this->throw_error(" First Method No. Of Rates");
+            $this->logFailure(" First Method No. Of Rates");
         }
         try {
             $this->no_of_rates=(int) $this->xml->xpath("//a[@itemprop='ratingCount']")[0]->__toString();
         }
         catch (Error | Exception $e)
         {
-            $this->throw_error(" First Method No. Of Rates");
+            $this->logFailure(" First Method No. Of Rates");
             $this->no_of_rates=0;
         }
     }
@@ -181,14 +181,14 @@ class Walmart extends MainStore
         }
         catch (Error | Exception $e )
         {
-            $this->throw_error("The Rate First Method");
+            $this->logFailure("The Rate First Method");
         }
         try {
             $this->rating=Str::remove(['(',')'] , $this->xml->xpath("//span[contains(@class , 'rating-number')]")[0]->__toString());
         }
         catch (Error | Exception $e )
         {
-            $this->throw_error("The Rate First Method");
+            $this->logFailure("The Rate First Method");
             $this->rating="NA";
         }
 
@@ -205,7 +205,7 @@ class Walmart extends MainStore
         }
         catch (Error | Exception $e )
         {
-            $this->throw_error("The Seller First Method" );
+            $this->logFailure("The Seller First Method" );
         }
 
         try {
@@ -217,7 +217,7 @@ class Walmart extends MainStore
         }
         catch (Error | Exception $e )
         {
-            $this->throw_error("The Seller Second method" );
+            $this->logFailure("The Seller Second method" );
         }
 
         //seller method for subscribe and save items
@@ -234,7 +234,7 @@ class Walmart extends MainStore
         }
         catch (Error | Exception $e )
         {
-            $this->throw_error("The Seller Third Method" );
+            $this->logFailure("The Seller Third Method" );
             $this->seller="";
         }
     }
@@ -245,7 +245,7 @@ class Walmart extends MainStore
         }
         catch (Error  | Exception $e)
         {
-            $this->throw_error("Shipping Price");
+            $this->logFailure("Shipping Price");
             $this->shipping_price= 0;
         }
     }
@@ -411,7 +411,7 @@ class Walmart extends MainStore
         try {
             $this->condition = (Str::contains($this->information->offers->itemCondition , "NewCondition" , true)) ? "new" : "used" ;
         }catch (\Exception){
-            $this->throw_error("First Part Condition");
+            $this->logFailure("First Part Condition");
             $this->condition="new";
         }
     }

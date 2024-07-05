@@ -20,7 +20,7 @@ class ProductStoreSchedule
             //getting stores for the queue slug
             $product_stores = DB::table('product_store')
                 ->join('stores', 'stores.id', '=', 'store_id')
-                ->orderBy('product_store.updated_at')
+                ->orderBy('product_store.updated_at', 'asc')
                 ->select([
                     "product_store.id",
                     "product_store.product_id",

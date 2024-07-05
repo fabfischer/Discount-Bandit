@@ -268,8 +268,8 @@ class ProductResource extends Resource
                     ->limit(50)
                     ->searchable()
                     ->sortable(),
-                Tables\Columns\SelectColumn::make('status')
-                    ->options(StatusEnum::class),
+                /*Tables\Columns\SelectColumn::make('status')
+                    ->options(StatusEnum::class),*/
                 Tables\Columns\TextColumn::make('stores.name')->formatStateUsing(function ($state) {
                     return Str::of(Str::replace(",", "<br>", $state))->toHtmlString();
                 }),

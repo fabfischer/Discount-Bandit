@@ -6,6 +6,7 @@ use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
+use Illuminate\Support\Str;
 use NotificationChannels\Webhook\WebhookChannel;
 use NotificationChannels\Webhook\WebhookMessage;
 
@@ -38,10 +39,11 @@ class ProductDiscount extends Notification
     public function toNtfy($notifiable)
     {
         Ntfy::send(
-            "$this->price$this->currency - " . \Str::words($this->product_name, 5),
+            "$this->price$this->currency - " . Str::words($this->product_name, 5),
             "view, Open in $this->store_name, $this->product_url",
             "Your product $this->product_name, is at discount with price $this->currency $this->price",
-            $this->image
+            $this->image,
+            'email'
         );
     }
 

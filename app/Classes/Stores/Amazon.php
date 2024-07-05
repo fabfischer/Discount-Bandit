@@ -45,9 +45,8 @@ class Amazon extends MainStore
             Log::error(
                 sprintf("The error message is %s \n", $message)
             );
-            Ntfy::send(
+            Ntfy::error(
                 "Couldn't Crawl the website",
-                "",
                 "The following url couldn't be crawled. The error message is $message"
             );
             return;
@@ -88,18 +87,7 @@ class Amazon extends MainStore
         $this->get_seller();
         $this->get_shipping_price();
 
-
-
-        $product = Product::find($this->current_record->product_id);
-        $name = ($product) ? $product->name : $this->current_record->product_id;
         // Log::info("Product: $name crawled successfully");
-        if (empty($this->price)) {
-            Ntfy::send(
-                "Couldn't get the price [$name]",
-                "",
-                "The product with the name/id $name couldn't be fetched"
-            );
-        }
 
         $this->current_record->update([
             'price'              => (float)$this->price,
@@ -136,14 +124,14 @@ class Amazon extends MainStore
             $this->name = explode(":", $this->document->getElementsByTagName("title")->item(0)->textContent)[0];
             return;
         } catch (Error|Exception $e) {
-            $this->throw_error("Product Name First Method");
+            $this->logFailure("Product Name First Method", $e->getMessage(), 'warning');
         }
 
         try {
             $this->name = trim($this->center_column->xpath("//span[@id='productTitle'][1]")[0]
                 ->__toString());
         } catch (Error|Exception $e) {
-            $this->throw_error("Product Name Second Method");
+            $this->logFailure("Product Name Second Method", $e->getMessage(), 'warning');
             $this->name = "NA";
         }
 
@@ -155,7 +143,7 @@ class Amazon extends MainStore
         try {
             $this->image = $this->document->getElementById("landingImage")->getAttribute("data-old-hires");
         } catch (Error|Exception $e) {
-            $this->throw_error("The Image");
+            $this->logFailure("The Image", $e->getMessage(), 'notice');
             $this->image = "";
         }
 
@@ -188,11 +176,21 @@ class Amazon extends MainStore
                     ->xpath("//div[@id='corePriceDisplay_desktop_feature_div']//span[@class='a-price-fraction']")[0]
                     ->__toString());
 
+            // remove . and , from price (whole)
+            $whole = (int)Str::replace([".", ","], "", $whole);
+
             $this->price = (float)"$whole.$fraction";
+
             return;
         } catch (Error|\Exception $e) {
-            $this->throw_error("Price Second");
+            $this->logFailure("Price", $e->getMessage(), 'warning');
             $this->price = 0;
+            /*$product = Product::find($this->current_record->product_id);
+            $name = ($product) ? $product->name : $this->current_record->product_id;
+            Ntfy::error(
+                "Couldn't get the price [$name]",
+                "The product with the name/id $name couldn't be fetched"
+            );*/
         }
 
     }
@@ -208,7 +206,7 @@ class Amazon extends MainStore
 
             $this->in_stock = false;
         } catch (\Exception $e) {
-            $this->throw_error("Stock");
+            $this->logFailure("Stock", $e->getMessage(), 'notice');
             $this->in_stock = true;
         }
     }
@@ -219,7 +217,7 @@ class Amazon extends MainStore
             $ratings = $this->center_column->xpath("//span[@id='acrCustomerReviewText']")[0]->__toString();
             $this->no_of_rates = (int)get_numbers_only_with_dot($ratings);
         } catch (Error|Exception $e) {
-            $this->throw_error("No. Of Rates");
+            // $this->logFailure("No. Of Rates", $e->getMessage(), 'notice');
             $this->no_of_rates = 0;
         }
     }
@@ -234,7 +232,7 @@ class Amazon extends MainStore
                 $this->center_column->xpath("//div[@id='averageCustomerReviews']//span[@id='acrPopover']//span[@class='a-icon-alt']")[0]->__toString(),
                 2)[0];
         } catch (Error|Exception $e) {
-            $this->throw_error("The Rate");
+            // $this->logFailure("The Rate", $e->getMessage(), 'notice');
             $this->rating = -1;
         }
 
@@ -249,7 +247,7 @@ class Amazon extends MainStore
                 ->__toString();
             return;
         } catch (Error|Exception $e) {
-            $this->throw_error("The Seller First Method");
+            $this->logFailure("The Seller First Method", $e->getMessage(), 'warning');
         }
 
         try {
@@ -259,7 +257,7 @@ class Amazon extends MainStore
                 ->__toString();
             return;
         } catch (Error|Exception $e) {
-            $this->throw_error("The Seller Second method");
+            $this->logFailure("The Seller Second method", $e->getMessage(), 'warning');
         }
 
         //seller method for subscribe and save items
@@ -274,7 +272,7 @@ class Amazon extends MainStore
 
             return;
         } catch (Error|Exception $e) {
-            $this->throw_error("The Seller Third Method");
+            $this->logFailure("The Seller Third Method", $e->getMessage(), 'warning');
             $this->seller = "";
         }
     }
@@ -286,8 +284,7 @@ class Amazon extends MainStore
             $shipping_price = Str::replace(",", ".", $shipping_price);
             $this->shipping_price = (float)get_numbers_only_with_dot($shipping_price);
         } catch (Error|Exception $e) {
-
-            $this->throw_error("Shipping Price");
+            $this->logFailure("Shipping Price", $e->getMessage(), 'warning');
             $this->shipping_price = 0;
         }
     }

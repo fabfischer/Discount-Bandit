@@ -121,7 +121,7 @@ class Argos extends MainStore
             return;
         }
         catch ( Error | Exception $e) {
-            $this->throw_error("Product Name First Method");
+            $this->logFailure("Product Name First Method");
         }
 
         try {
@@ -130,7 +130,7 @@ class Argos extends MainStore
             return;
         }
         catch (Error | Exception $e){
-            $this->throw_error("Product Name Second Method");
+            $this->logFailure("Product Name Second Method");
         }
 
         try {
@@ -138,7 +138,7 @@ class Argos extends MainStore
                 ->__toString());
         }
         catch ( Error | Exception $e) {
-            $this->throw_error("Product Name Third Method");
+            $this->logFailure("Product Name Third Method");
             $this->name = "NA";
         }
 
@@ -151,14 +151,14 @@ class Argos extends MainStore
             return;
         }
         catch ( Error | Exception $e) {
-            $this->throw_error("The Image First Method");
+            $this->logFailure("The Image First Method");
         }
 
         try {
             $this->image="https:" . $this->core_product->xpath("//*[@data-test='component-media-gallery']//img[1]")[0]->attributes()->{'src'}->__toString();
             }
         catch ( Error | Exception $e) {
-            $this->throw_error("The Image Second Method");
+            $this->logFailure("The Image Second Method");
         }
 
     }
@@ -170,7 +170,7 @@ class Argos extends MainStore
         }
         catch ( Error | \Exception  $e )
         {
-            $this->throw_error("First Method Price");
+            $this->logFailure("First Method Price");
         }
 //        method 2 to return the price of the product
         try {
@@ -178,7 +178,7 @@ class Argos extends MainStore
             return;
         }
         catch (Error | \Exception $e ) {
-            $this->throw_error("Price Second");
+            $this->logFailure("Price Second");
         }
 
         try {
@@ -187,7 +187,7 @@ class Argos extends MainStore
         }
         catch (Error | \Exception $e )
         {
-            $this->throw_error( "Price Third");
+            $this->logFailure( "Price Third");
             $this->price=0;
         }
 
@@ -198,7 +198,7 @@ class Argos extends MainStore
             $this->in_stock= $this->json_data["attributes"]["deliverable"];
         }
         catch (\Exception $e){
-            $this->throw_error( "Stock");
+            $this->logFailure( "Stock");
             $this->in_stock=true;
         }
     }
@@ -209,7 +209,7 @@ class Argos extends MainStore
         }
         catch (Error | Exception $e)
         {
-            $this->throw_error("No. Of Rates First Method");
+            $this->logFailure("No. Of Rates First Method");
         }
 
         try {
@@ -217,7 +217,7 @@ class Argos extends MainStore
         }
         catch (Error | Exception $e)
         {
-            $this->throw_error("No. Of Rates Second Method");
+            $this->logFailure("No. Of Rates Second Method");
         }
     }
     public function get_rate(){
@@ -227,7 +227,7 @@ class Argos extends MainStore
         }
         catch (Error | Exception $e )
         {
-            $this->throw_error("The Rate First Method");
+            $this->logFailure("The Rate First Method");
             $this->rating= -1;
         }
 
@@ -246,7 +246,7 @@ class Argos extends MainStore
         }
         catch (Error  | Exception $e)
         {
-            $this->throw_error("Shipping Price");
+            $this->logFailure("Shipping Price");
             $this->shipping_price= 0;
         }
     }

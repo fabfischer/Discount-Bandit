@@ -115,7 +115,7 @@ class DIY extends MainStore
             return;
         }
         catch (Error | Exception $e){
-            $this->throw_error("Product Name First Method");
+            $this->logFailure("Product Name First Method");
         }
 
         try {
@@ -123,7 +123,7 @@ class DIY extends MainStore
             return;
         }
         catch (Error | Exception $e){
-            $this->throw_error("Product Name Second Method");
+            $this->logFailure("Product Name Second Method");
         }
 
         try {
@@ -131,14 +131,14 @@ class DIY extends MainStore
             return;
         }
         catch ( Error | Exception $e) {
-            $this->throw_error("Product Name Third Method");
+            $this->logFailure("Product Name Third Method");
         }
 
         try {
             $this->name = $this->document->getElementById("product-title")->textContent;
         }
         catch ( Error | Exception $e) {
-            $this->throw_error("Product Name Fourth Method");
+            $this->logFailure("Product Name Fourth Method");
             $this->name = "NA";
         }
 
@@ -150,13 +150,13 @@ class DIY extends MainStore
             return;
         }
         catch ( Error | Exception $e) {
-            $this->throw_error("The Image First Method");
+            $this->logFailure("The Image First Method");
         }
         try {
             $this->image = explode("?" ,$this->left_column->xpath("//div[@data-test-id='PrimaryImage']//img")[0]->attributes()->src->__toString() )[0];
         }
         catch ( Error | Exception $e) {
-            $this->throw_error("The Image Second Method");
+            $this->logFailure("The Image Second Method");
             $this->image = "";
         }
 
@@ -170,7 +170,7 @@ class DIY extends MainStore
         }
         catch ( Error | \Exception  $e )
         {
-            $this->throw_error("First Method Price");
+            $this->logFailure("First Method Price");
         }
         //method 2 to return the price of the product
         try {
@@ -179,7 +179,7 @@ class DIY extends MainStore
         }
         catch (Error | \Exception $e )
         {
-            $this->throw_error( "Price Second");
+            $this->logFailure( "Price Second");
             $this->price=0;
         }
 
@@ -189,7 +189,7 @@ class DIY extends MainStore
             $this->in_stock=Str::contains($this->json_data["offers"]["availability"] , "instock", true);
             return;
         }catch (\Exception $e){
-            $this->throw_error( "Stock Availability First Method");
+            $this->logFailure( "Stock Availability First Method");
             $this->in_stock=true;
         }
 
@@ -201,7 +201,7 @@ class DIY extends MainStore
         }
         catch (Error | Exception $e)
         {
-            $this->throw_error("No. Of Rates");
+            $this->logFailure("No. Of Rates");
             $this->no_of_rates=0;
         }
     }
@@ -215,7 +215,7 @@ class DIY extends MainStore
         }
         catch (Error | Exception $e )
         {
-            $this->throw_error("The Rate");
+            $this->logFailure("The Rate");
             $this->rating= -1;
         }
 
@@ -230,7 +230,7 @@ class DIY extends MainStore
         }
         catch (Error | Exception $e )
         {
-            $this->throw_error("The Seller First Method" );
+            $this->logFailure("The Seller First Method" );
         }
 
     }
@@ -240,7 +240,7 @@ class DIY extends MainStore
         }
         catch (Error  | Exception $e)
         {
-            $this->throw_error("Shipping Price");
+            $this->logFailure("Shipping Price");
             $this->shipping_price= 0;
         }
     }

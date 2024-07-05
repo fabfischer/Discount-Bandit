@@ -4,8 +4,13 @@ namespace App\Notifications;
 
 class Ntfy
 {
-    public static function send(string $title, string $actions, string $body, ?string $attachment = null): void
-    {
+    public static function send(
+        string $title,
+        string $actions,
+        string $body,
+        ?string $attachment = null,
+        ?string $tags = null
+    ): void {
         $auth = [];
 
         if (env("NTFY_USER") && env("NTFY_PASSWORD")) {
@@ -26,8 +31,11 @@ class Ntfy
             "Cache: no",
             'Title'        => $title,
             "Actions"      => $actions,
-            "Tags"         => "email",
         ];
+        if ($tags) {
+            $details["Tags"] = $tags;
+        }
+
         if ($attachment) {
             $details["Attach"] = $attachment;
         }
@@ -39,5 +47,14 @@ class Ntfy
         if ($result->failed()) {
             \Log::error("Ntfy failed to send notification. Reason: " . $result->body());
         }
+    }
+
+    public static function error(string $title, string $body): void
+    {
+        if (empty(env("NTFY_ERROR_LINK")) === true) {
+            return;
+        }
+
+        self::send($title, "", $body, null, "rotating_light");
     }
 }

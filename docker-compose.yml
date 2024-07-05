@@ -31,6 +31,7 @@ services:
             ADMIN_PASSWORD: '${ADMIN_PASSWORD}'
             ADMIN_USERNAME: '${ADMIN_USERNAME}'
             NTFY_LINK: "${NTFY_LINK}"
+            NTFY_ERROR_LINK: "${NTFY_ERROR_LINK}"
             NTFY_USER: "${NTFY_USER}"
             NTFY_PASSWORD: "${NTFY_PASSWORD}"
             NTFY_TOKEN: "${NTFY_TOKEN}"
