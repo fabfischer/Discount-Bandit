@@ -115,7 +115,7 @@ class ProductController extends Controller
                     ],
                 ],
                 'stroke' => [
-                    'curve' => 'smooth',
+                    // 'curve' => 'smooth',
                 ],
                 'dataLabels' => [
                     'enabled' => false,

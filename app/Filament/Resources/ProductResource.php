@@ -357,11 +357,12 @@ class ProductResource extends Resource
                                 RepeatableEntry::make('last_price_history')
                                     ->hiddenLabel()
                                     ->contained(false)
-                                    ->columns(2)
+                                    ->columns(3)
                                     ->schema([
                                         TextEntry::make('created_at')->hiddenLabel()->formatStateUsing(function(string $state, ?PriceHistory $record = null){
                                             return $record?->created_at->diffForHumans();
                                         }),
+                                        TextEntry::make('change')->hiddenLabel(),
                                         TextEntry::make('price')
                                             ->formatStateUsing(function(string $state, ?PriceHistory $record = null){
                                                 $currency = $record?->store()?->getResults()?->currency()?->getResults()?->code;

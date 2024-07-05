@@ -2,6 +2,7 @@
 
 namespace App\Providers\Filament;
 
+use App\Filament\Pages\LatestPriceChanges;
 use App\Filament\Resources\StoreResource;
 use Awcodes\FilamentQuickCreate\QuickCreatePlugin;
 use Filament\Http\Middleware\Authenticate;
@@ -45,6 +46,7 @@ class AdminPanelProvider extends PanelProvider
 //                Pages\Dashboard::class
 //            ])
             ->widgets([
+                \App\Livewire\LatestPriceChanges::class,
                 AccountWidget::class,
                 FilamentInfoWidget::class,
             ])

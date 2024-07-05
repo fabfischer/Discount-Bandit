@@ -25,4 +25,16 @@ class PriceHistory extends Model
     {
         return $this->belongsTo(Store::class, 'store_id', 'id');
     }
+
+    /**
+     * Scope a query to only include the latest price history for each product.
+     */
+    public function scopeLatestPerProduct($query): \Illuminate\Database\Eloquent\Builder
+    {
+        return $query->whereIn('price_histories.id', function ($subquery) {
+            $subquery->selectRaw('MAX(price_histories.id)') // Assuming 'id' is auto-incrementing
+            ->from('price_histories')
+                ->groupBy('product_id');
+        });
+    }
 }

@@ -178,10 +178,12 @@ abstract class MainStore
                 ]);
             }
 
-            Log:
             if ((float)$history->price !== (float)$price) {
+                $diff = (float)$price - (float)$history->price;
+                // round to 2 decimal places
+                $diff = round($diff, 2);
                 $product = Product::find($product_id);
-                info('Price History for ' . $product?->name, ['new Price' => (float)$price, 'old Price' => (float)$history->price]);
+                Log::info('Price History for ' . $product?->name, ['new Price' => (float)$price, 'old Price' => (float)$history->price, 'diff' => $diff]);
                 /*$history->update([
                     'price' => $price
                 ]);*/
@@ -189,7 +191,8 @@ abstract class MainStore
                     'product_id' => $product_id,
                     'store_id'   => $store_id,
                     'date'       => \Carbon\Carbon::today()->toDateString(),
-                    'price'      => $price
+                    'price'      => $price,
+                    'change'     => (float)$price - (float)$history->price
                 ]);
             }
 

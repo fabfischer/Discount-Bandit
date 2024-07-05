@@ -102,7 +102,7 @@ class PriceHistoryChart extends ApexChartWidget
                     ],
                 ],
                 'stroke'     => [
-                    'curve' => 'smooth',
+                    // 'curve' => 'smooth',
                 ],
                 'dataLabels' => [
                     'enabled' => false,

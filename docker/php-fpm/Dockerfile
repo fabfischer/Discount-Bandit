@@ -55,7 +55,7 @@ RUN docker-php-ext-enable rdkafka \
 
 # Install PHP extensions zip, mbstring, exif, bcmath, intl
 RUN docker-php-ext-configure gd --with-freetype --with-jpeg
-RUN docker-php-ext-install  zip mbstring exif pcntl bcmath -j$(nproc) gd intl
+RUN docker-php-ext-install zip mbstring exif pcntl bcmath -j$(nproc) gd intl
 
 # imagemagick
 RUN apt-get update && apt-get install -y libmagickwand-dev --no-install-recommends

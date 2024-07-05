@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\ProductResource\Pages;
 
 use App\Filament\Resources\ProductResource;
+use App\Livewire\LatestPriceChanges;
 use App\Models\Category;
 use Filament\Actions;
 use Filament\Resources\Components\Tab;
@@ -19,6 +20,13 @@ class ListProducts extends ListRecords
     {
         return [
             Actions\CreateAction::make()
+        ];
+    }
+
+    protected function getHeaderWidgets(): array
+    {
+        return [
+            LatestPriceChanges::class,
         ];
     }
 
