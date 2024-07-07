@@ -399,6 +399,15 @@ class ProductResource extends Resource
                                 StatusEnum::Silenced => 'danger',
                             };
                         }),
+                        TextEntry::make('product_store.best_price')
+                            ->label('Best Price (in History)')
+                            ->formatStateUsing(function (string $state, ?Product $record = null) {
+
+                                $currency = empty($record?->product_store) === false
+                                    ? $record?->product_store?->first()?->store()?->getResults()?->currency()?->getResults()?->code
+                                    : null;
+                                return $state . " " . $currency;
+                            })
                     ])->grow(false),
                 ])->columnSpan('full')->from('sm'),
             ]);

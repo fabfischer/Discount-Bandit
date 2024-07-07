@@ -75,7 +75,8 @@ LIMIT 20;';
                     ->on('price_histories.created_at', '=', 'latest_ph.latest');
             })
             ->join('products', 'price_histories.product_id', '=', 'products.id')
-            ->select('price_histories.*', 'products.name as product_name')
+            ->join('product_store', 'product_store.product_id', '=', 'products.id') // TODO: take store into account
+            ->select('price_histories.*', 'products.name as product_name', 'product_store.best_price')
             ->mergeBindings($latestPriceHistoriesSubquery->getQuery()) // Important: merge SQL bindings
             ->orderBy('price_histories.created_at', 'DESC')
             ->limit(20);
@@ -102,9 +103,12 @@ LIMIT 20;';
 
                     ->sortable(),
                 TextColumn::make('change')
-                    ->label('Price Change'),
+                    ->label('Last Price Change'),
                 TextColumn::make('price')
+                    ->label('Current Price')
                     ->color(fn($record) => (($record->price <= $record->notify_price) ? "success" : "danger")),
+                TextColumn::make('best_price')
+                    ->label('Best Price (in History)'),
             ])
             ->actions([]);
     }

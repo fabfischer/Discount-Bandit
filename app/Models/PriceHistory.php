@@ -12,7 +12,8 @@ class PriceHistory extends Model
     use HasFactory;
 
     protected $casts = [
-        "price" => Money::class
+        "price"      => Money::class,
+        "best_price" => Money::class
     ];
     protected $guarded = ['id'];
 

@@ -87,9 +87,7 @@ class Amazon extends MainStore
         $this->get_seller();
         $this->get_shipping_price();
 
-        // Log::info("Product: $name crawled successfully");
-
-        $this->current_record->update([
+        $updateData = [
             'price'              => (float)$this->price,
             'number_of_rates'    => $this->no_of_rates,
             'seller'             => $this->seller,
@@ -98,7 +96,17 @@ class Amazon extends MainStore
             'condition'          => "new",
             'in_stock'           => $this->in_stock,
             'notifications_sent' => ($this->check_notification()) ? ++$this->current_record->notifications_sent : $this->current_record->notifications_sent,
-        ]);
+        ];
+
+        // Log::info("Product: $name crawled successfully");
+        // get last attr "best_price" to compare with the new price
+        $lastRecord =  ProductStore::find($this->current_record->id);
+        if ((float)$lastRecord->best_price > (float)$this->price || !$lastRecord->best_price) {
+            $updateData['best_price'] = (float)$this->price;
+            $updateData['best_price_date'] = now();
+        }
+
+        $this->current_record->update($updateData);
 
         parent::record_price_history(
             product_id: $this->current_record->product_id,

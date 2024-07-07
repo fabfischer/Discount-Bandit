@@ -10,6 +10,7 @@ class ProductStore extends Pivot
 {
     protected $casts = [
         'price'          => Money::class,
+        'best_price'     => Money::class,
         'notify_price'   => Money::class,
         'shipping_price' => Money::class,
     ];
