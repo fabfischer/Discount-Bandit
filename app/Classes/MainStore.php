@@ -173,7 +173,7 @@ abstract class MainStore
                 // get last PriceHistory by $product_id and $store_id
                 $history = PriceHistory::where('product_id', $product_id)
                     ->where('store_id', $store_id)
-                    ->latest()
+                    ->orderBy('date', 'desc')
                     ->first();
 
                 PriceHistory::create([
