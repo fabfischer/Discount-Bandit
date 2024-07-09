@@ -100,10 +100,12 @@ class Amazon extends MainStore
 
         // Log::info("Product: $name crawled successfully");
         // get last attr "best_price" to compare with the new price
-        $lastRecord =  ProductStore::find($this->current_record->id);
+        $lastRecord = ProductStore::find($this->current_record->id);
         if ((float)$lastRecord->best_price > (float)$this->price || !$lastRecord->best_price) {
-            $updateData['best_price'] = (float)$this->price;
-            $updateData['best_price_date'] = now();
+            if ($this->price != 0) {
+                $updateData['best_price'] = (float)$this->price;
+                $updateData['best_price_date'] = now();
+            }
         }
 
         $this->current_record->update($updateData);
