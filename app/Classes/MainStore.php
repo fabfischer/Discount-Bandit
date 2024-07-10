@@ -175,32 +175,30 @@ abstract class MainStore
                     ->where('store_id', $store_id)
                     ->orderBy('date', 'desc')
                     ->first();
-
-                PriceHistory::create([
-                    'product_id' => $product_id,
-                    'store_id'   => $store_id,
-                    'date'       => \Carbon\Carbon::today()->toDateString(),
-                    'price'      => $price
-                ]);
             }
 
-            if ((float)$history->price !== (float)$price) {
+            $diff = 0;
+            if ($history) {
                 $diff = (float)$price - (float)$history->price;
                 // round to 2 decimal places
                 $diff = round($diff, 2);
-                $product = Product::find($product_id);
-                Log::info('Price History for ' . $product?->name, ['new Price' => (float)$price, 'old Price' => (float)$history->price, 'diff' => $diff]);
-                /*$history->update([
-                    'price' => $price
-                ]);*/
-                PriceHistory::create([
-                    'product_id' => $product_id,
-                    'store_id'   => $store_id,
-                    'date'       => \Carbon\Carbon::today()->toDateString(),
-                    'price'      => $price,
-                    'change'     => (float)$price - (float)$history->price
-                ]);
+
             }
+
+            $product = Product::find($product_id);
+
+            Log::info('Price History for ' . $product?->name,
+                ['new Price' => (float)$price, 'old Price' => (float)$history->price, 'diff' => $diff]);
+            /*$history->update([
+                'price' => $price
+            ]);*/
+            PriceHistory::create([
+                'product_id' => $product_id,
+                'store_id'   => $store_id,
+                'date'       => \Carbon\Carbon::today()->toDateString(),
+                'price'      => $price,
+                'change'     => (float)$price - (float)$history->price
+            ]);
 
         } catch (\Exception $e) {
             Log::error("Couldn't update the price history. Reason: " . $e->getMessage(), ['error' => $e]);

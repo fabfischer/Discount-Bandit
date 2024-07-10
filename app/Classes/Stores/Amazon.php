@@ -87,6 +87,10 @@ class Amazon extends MainStore
         $this->get_seller();
         $this->get_shipping_price();
 
+        if ($this->price == 0) {
+            return;
+        }
+
         $updateData = [
             'price'              => (float)$this->price,
             'number_of_rates'    => $this->no_of_rates,
