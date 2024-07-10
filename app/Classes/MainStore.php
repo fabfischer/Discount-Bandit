@@ -162,6 +162,7 @@ abstract class MainStore
         }
 
         try {
+            $lastFetchedToday = true;
             // get latest (ordered by created_at) PriceHistory by $product_id, $store_id and today's date
             $history = PriceHistory::where('product_id', $product_id)
                 ->where('store_id', $store_id)
@@ -175,6 +176,7 @@ abstract class MainStore
                     ->where('store_id', $store_id)
                     ->orderBy('date', 'desc')
                     ->first();
+                $lastFetchedToday = false;
             }
 
             $diff = 0;
@@ -182,16 +184,23 @@ abstract class MainStore
                 $diff = (float)$price - (float)$history->price;
                 // round to 2 decimal places
                 $diff = round($diff, 2);
-
             }
 
             $product = Product::find($product_id);
 
-            Log::info('Price History for ' . $product?->name,
-                ['new Price' => (float)$price, 'old Price' => (float)$history->price, 'diff' => $diff]);
+
             /*$history->update([
                 'price' => $price
             ]);*/
+            if ($lastFetchedToday === true && empty($diff) === true) {
+                return;
+            }
+
+            Log::info(
+                'Price History for ' . $product?->name,
+                ['new Price' => (float)$price, 'old Price' => (float)$history->price, 'diff' => $diff]
+            );
+
             PriceHistory::create([
                 'product_id' => $product_id,
                 'store_id'   => $store_id,
