@@ -6,9 +6,7 @@ networks:
 
 services:
     nginx:
-        build:
-            context: ./docker/nginx
-            dockerfile: Dockerfile
+        image: 'ffischer/discount-bandit-nginx:0.1'
         depends_on:
             - php-fpm
         ports:
@@ -21,9 +19,7 @@ services:
             - './docker/nginx/nginx-default.conf:/etc/nginx/sites-enabled/default.conf'
             - '.:/var/www/html'
     php-fpm:
-        build:
-            context: ./docker/php-fpm
-            dockerfile: Dockerfile
+        image: 'ffischer/discount-bandit-php:0.1'
         restart: "no"
         environment:
             WWWUSER: '${WWWUSER}'

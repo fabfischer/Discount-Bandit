@@ -8,13 +8,21 @@ echo "   Starting LARAVEL PHP-FPM Container                      "
 echo "***********************************************************"
 
 # check if $ADMIN_PASSWORD is not "password" or missing and exit if it is
-if [ "$ADMIN_PASSWORD" = "password" ] || [ -z "$ADMIN_PASSWORD" ]; then
+if [ "$ADMIN_PASSWORD" = "password" ]; then
     echo "${Red} ADMIN_PASSWORD is set to default password, please change it"
     exit 1
 fi
+if [ -z "$ADMIN_PASSWORD" ]; then
+    echo "${Red} ADMIN_PASSWORD is empty, please change it"
+    exit 1
+fi
 # check if $ADMIN_EMAIL is not "admin@example.com" and exit if it is
-if [ "$ADMIN_EMAIL" = "admin@example.com"|| [ -z "$ADMIN_EMAIL" ]; then
+if [ "$ADMIN_EMAIL" = "admin@example.com"]; then
     echo "${Red} ADMIN_EMAIL is set to default email, please change it"
+    exit 1
+fi
+if [ -z "$ADMIN_EMAIL" ]; then
+    echo "${Red} ADMIN_EMAIL is empty, please change it"
     exit 1
 fi
 
